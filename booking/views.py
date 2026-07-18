@@ -3,6 +3,7 @@ from .models import Provider, Appointment, ServiceItem
 from .serializers import ProviderListSerializer, AppointmentCreateSerializer, AdminCalendarAppointmentSerializer, AdminServiceItemSerializer, AdminProviderOptionSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
+import datetime
 
 class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -13,7 +14,43 @@ class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Provider.objects.all()
     serializer_class = ProviderListSerializer
     # 未來這裡可以覆寫 get_queryset() 來實作多租戶： return Provider.objects.filter(shop=self.request.user.shop)
+    # ==========================================
+    # URL: GET /api/providers/{id}/available_slots/?date=2026-07-18&service_id=2
+    # ==========================================
+    @action(detail=True, methods=['get'], url_path='available_slots')
+    def available_slots(self, request, pk=None):
+        """
+        攔截前端帶來的日期與服務項目，丟入 Model 演算法計算
+        """
+        # 1. 自動根據網址的 {id} 撈出對應的美甲師實例
+        provider = self.get_object()
+        
+        # 2. 抓取前端帶在網址後面的 Query Parameters
+        date_str = request.query_params.get('date')
+        service_id = request.query_params.get('service_id')
 
+        # 3. 安全防禦：檢查參數有沒有漏掉
+        if not date_str or not service_id:
+            return Response({"error": "請提供 date 與 service_id 參數"}, status=400)
+
+        # 4. 安全防禦：將字串 '2026-07-18' 轉換為 Python 的 date 物件
+        try:
+            target_date = datetime.date.fromisoformat(date_str)
+        except ValueError:
+            return Response({"error": "日期格式錯誤，請使用 YYYY-MM-DD"}, status=400)
+
+        # 5. 安全防禦：檢查該服務項目在資料庫是否存在
+        try:
+            service_item = ServiceItem.objects.get(id=service_id)
+        except ServiceItem.DoesNotExist:
+            return Response({"error": "找不到指定的服務項目"}, status=400)
+
+        # 6. 呼叫我們在 Model 裡寫好的高級防撞期核心演算法！
+        available_slots = provider.get_available_slots(target_date, service_item)
+        
+        # 7. 完美拋回給前端，格式會直接對齊：[{'start_time': '...', 'end_time': '...'}, ...]
+        return Response(available_slots)
+    
 class AppointmentViewSet(viewsets.ModelViewSet):
     """
     預約訂單視圖 (大堂經理)
