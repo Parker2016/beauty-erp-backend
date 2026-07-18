@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils import timezone
 import datetime
-from .models import Shop, Customer, Provider, ServiceItem, Appointment
+from .models import Shop, Customer, Provider, ServiceItem, Appointment, ServiceRecord
 
 # ==========================================
 # GET 專用：讀取嵌套 (Read Nested)
@@ -170,4 +170,57 @@ class AdminServiceItemSerializer(serializers.ModelSerializer):
             providers = Provider.objects.filter(id__in=provider_ids, shop=instance.shop)
             instance.providers.set(providers)
             
+        return instance
+
+class AdminServiceRecordSerializer(serializers.ModelSerializer):
+    """施作紀錄的扁平轉譯器"""
+    id = serializers.IntegerField(required=False, allow_null=True)
+
+    class Meta:
+        model = ServiceRecord
+        # 對齊前端傳入的材料色號與作品照網址
+        fields = ['id', 'materials_note', 'image_url']
+
+
+class AdminAppointmentWithRecordSerializer(serializers.ModelSerializer):
+    """
+    業主後台專用：預約狀態與施作紀錄的「一對一聯合寫入」序列化器
+    """
+    # 💡 靈魂核心：將一對一關聯的 record 宣告進來，達成巢狀 JSON 解析
+    record = AdminServiceRecordSerializer(required=False, allow_null=True)
+    
+    # 唯讀欄位優化：直接從 ForeignKey 關係撈出名字，免除前端二次查詢
+    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    service_name = serializers.CharField(source='service.name', read_only=True)
+
+    class Meta:
+        model = Appointment
+        fields = ['id', 'status', 'start_time', 'customer_name', 'service_name', 'record']
+
+    def update(self, instance, validated_data):
+        """
+        關鍵覆寫：手動拆解巢狀 JSON，達成一對一聯合防禦更新
+        """
+        # 1. 核心剝離：把 record 資料從驗證後的字典中抽出來
+        record_data = validated_data.pop('record', None)
+
+        # 2. 更新 Appointment 本身的欄位（例如狀態機變更：CONFIRMED -> COMPLETED）
+        instance.status = validated_data.get('status', instance.status)
+        instance.start_time = validated_data.get('start_time', instance.start_time)
+        instance.save()
+
+        # 3. 處理一對一 ServiceRecord 的生命週期
+        if record_data is not None:
+            materials_note = record_data.get('materials_note', '')
+            image_url = record_data.get('image_url', '')
+
+            # 利用 Django ORM 的原子操作：有舊紀錄就更新，沒紀錄就自動新建
+            ServiceRecord.objects.update_or_create(
+                appointment=instance, # 依據這個一對一外鍵定錨
+                defaults={
+                    'materials_note': materials_note,
+                    'image_url': image_url
+                }
+            )
+
         return instance

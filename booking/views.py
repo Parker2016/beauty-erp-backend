@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions
 from .models import Provider, Appointment, ServiceItem  
-from .serializers import ProviderListSerializer, AppointmentCreateSerializer, AdminCalendarAppointmentSerializer, AdminServiceItemSerializer, AdminProviderOptionSerializer
+from .serializers import ProviderListSerializer, AppointmentCreateSerializer, AdminCalendarAppointmentSerializer, AdminServiceItemSerializer, AdminProviderOptionSerializer, AdminAppointmentWithRecordSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 import datetime
@@ -134,3 +134,21 @@ class AdminServiceItemViewSet(viewsets.ModelViewSet):
         queryset = Provider.objects.filter(shop_id=shop_id).order_by('id')
         serializer = AdminProviderOptionSerializer(queryset, many=True)
         return Response(serializer.data)
+
+class AdminAppointmentRecordViewSet(viewsets.ModelViewSet):
+    """
+    業主後台專用：預約單與一對一美甲紀錄的基礎建設大印表機 (CRUD)
+    """
+    serializer_class = AdminAppointmentWithRecordSerializer
+    permission_classes = [permissions.AllowAny] # 測試階段，未來上線改為 IsAuthenticated
+
+    def get_queryset(self):
+        """
+        嚴格多租戶網域隔離 ＋ 強效效能優化
+        """
+        shop_id = self.request.query_params.get('shop_id', 1)
+        
+        return Appointment.objects.filter(shop_id=shop_id)\
+            .select_related('customer', 'service')\
+            .prefetch_related('record')\
+            .order_by('-id') # 讓最新完成的預約單排在最上面，方便妹妹審查
