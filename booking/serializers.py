@@ -22,11 +22,13 @@ class ServiceItemSerializer(serializers.ModelSerializer):
             'category'
         ]
 
-class ProviderListSerializer(serializers.ModelSerializer):
+class ProviderSerializer(serializers.ModelSerializer):
+    """人員序列化器 (支援 CRUD 完整欄位)"""
+    shop_id = serializers.IntegerField(write_only=True, required=False, default=1)
+
     class Meta:
         model = Provider
-        fields = ['id', 'name', 'is_manager']
-
+        fields = ['id', 'name', 'is_manager', 'shop_id']
 
 # ==========================================
 # POST 專用：寫入扁平 (Write Flat) 與防超賣驗證
@@ -162,14 +164,14 @@ class AdminCalendarAppointmentSerializer(serializers.ModelSerializer):
     管理端行事曆專用：高密度嵌套讀取
     """
     customer = AdminCalendarCustomerSerializer(read_only=True)
-    service = AdminCalendarServiceItemSerializer(read_only=True)
+    services = AdminCalendarServiceItemSerializer(many=True, read_only=True)
     addons = AdminCalendarServiceItemSerializer(many=True, read_only=True)
     provider_name = serializers.CharField(source='provider.name', read_only=True)
 
     class Meta:
         model = Appointment
         fields = [
-            'id', 'customer', 'service', 'provider_name',
+            'id', 'customer', 'services', 'provider_name',
             'start_time', 'end_time', 'status', 'memo',
             'addons', 'final_price'
         ]
@@ -247,18 +249,22 @@ class AdminServiceRecordSerializer(serializers.ModelSerializer):
 
 class AdminAppointmentWithRecordSerializer(serializers.ModelSerializer):
     """
-    業主後台專用：預約狀態、多選主服務與施作紀錄的「一對一/多對多聯合寫入」序列化器 (完全體)
+    業主後台專用：預約狀態、多選主服務與施作紀錄的「一對一/多對多聯合寫入」序列化器 (完全體對齊版)
     """
     record = AdminServiceRecordSerializer(required=False, allow_null=True)
     
-    # 💡 1. 嵌套轉出加購項目 (唯讀陣列)
-    addons = ServiceItemSerializer(many=True, read_only=True)
+    # 💡 1. 補齊：嵌套 customer 物件 (包含 id, name, phone)，讓 Modal 能顯示顧客電話
+    customer = AdminCalendarCustomerSerializer(read_only=True)
+    customer_name = serializers.CharField(source='customer.name', read_only=True)
     
-    # 💡 2. 多對多主服務：傳出給前端讀取的完整服務物件列表 (唯讀陣列)
+    # 💡 2. 補齊：擔當美甲師名稱
+    provider_name = serializers.CharField(source='provider.name', read_only=True)
+
+    # 💡 3. 嵌套多選服務與加購項目 (採用帶有 price, duration_minutes 的 ServiceItemSerializer)
     services = ServiceItemSerializer(many=True, read_only=True)
-    
-    # 💡 3. 多對多主服務：接收前端傳入的 ID 陣列 (例如 service_ids: [1, 2])
-    # source='services' 會讓 DRF 自動將 ID 轉為 ServiceItem 物件並放進 validated_data['services']
+    addons = ServiceItemSerializer(many=True, read_only=True)
+
+    # 💡 4. 多對多主服務：接收前端 Modal 傳入的 ID 陣列 (例如 service_ids: [1, 2])
     service_ids = serializers.PrimaryKeyRelatedField(
         queryset=ServiceItem.objects.all(),
         many=True,
@@ -267,14 +273,23 @@ class AdminAppointmentWithRecordSerializer(serializers.ModelSerializer):
         source='services'
     )
 
-    customer_name = serializers.CharField(source='customer.name', read_only=True)
-
     class Meta:
         model = Appointment
-        # 💡 將 service_name 替換為 services 與 service_ids
+        # 💡 全面對齊 AdminCalendarAppointmentSerializer 所需的所有完整欄位
         fields = [
-            'id', 'status', 'start_time', 'customer_name', 
-            'services', 'service_ids', 'record', 'addons', 'final_price'
+            'id', 
+            'customer',        # 包含 name, phone 的顧客物件
+            'customer_name',   # 平鋪版顧客姓名 (備用相容)
+            'provider_name',   # 擔當美甲師名稱
+            'services',        # 多選主服務陣列 (含 price, duration_minutes)
+            'service_ids',     # 寫入用：服務 ID 陣列
+            'addons',          # 多選加購陣列 (含 price, duration_minutes)
+            'start_time',      # 開始時間
+            'end_time',        # 結束時間
+            'status',          # 預約狀態
+            'memo',            # 客戶留言備註
+            'final_price',     # 現場結帳實收金額
+            'record'           # 1:1 施作紀錄 (色號、款式照片)
         ]
 
     def update(self, instance, validated_data):
@@ -282,13 +297,15 @@ class AdminAppointmentWithRecordSerializer(serializers.ModelSerializer):
         services_data = validated_data.pop('services', None)
         record_data = validated_data.pop('record', None)
 
-        # 1. 更新 Appointment 本身的基本欄位
+        # 1. 更新 Appointment 本身的基本欄位 (包含 status, start_time, final_price)
         instance.status = validated_data.get('status', instance.status)
         instance.start_time = validated_data.get('start_time', instance.start_time)
+        instance.end_time = validated_data.get('end_time', instance.end_time)
+        instance.memo = validated_data.get('memo', instance.memo)
         instance.final_price = validated_data.get('final_price', instance.final_price)
         instance.save()
 
-        # 💡 2. 更新多對多主服務項目 (ManyToManyField)
+        # 2. 更新多對多主服務項目 (ManyToManyField)
         if services_data is not None:
             instance.services.set(services_data)  # 用 .set() 覆蓋全新的服務項目組合
 

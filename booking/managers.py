@@ -23,7 +23,11 @@ class AppointmentQuerySet(models.QuerySet):
             shop_id=shop_id,
             start_time__gte=aware_start,
             start_time__lte=aware_end
-        ).select_related('customer', 'service', 'provider').prefetch_related('addons').order_by('start_time')
+        ).select_related(
+            'customer', 'provider'             # 💡 1. 移除 'service'，只留單對一外鍵
+        ).prefetch_related(
+            'services', 'addons'               # 💡 2. 將 'services' 加入多對多預加載
+        ).order_by('start_time')
 
     def get_dashboard_stats(self, shop_id):
         """核心邏輯：計算營收與看板指標 (解決時區污染與漏算改價問題)"""
