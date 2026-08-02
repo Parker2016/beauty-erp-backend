@@ -190,11 +190,12 @@ class MerchantAdminViewSet(viewsets.ViewSet):
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         shop_id = request.query_params.get('shop_id', 1)
+        provider_id = request.query_params.get('provider_id') # 💡 抓取選定的美甲師 ID
 
         if not start_date or not end_date:
             return Response({"error": "請提供 start_date 與 end_date"}, status=400)
 
-        queryset = Appointment.objects.for_shop_calendar(shop_id, start_date, end_date)
+        queryset = Appointment.objects.for_shop_calendar(shop_id, start_date, end_date, provider_id)
         serializer = AdminCalendarAppointmentSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -202,7 +203,9 @@ class MerchantAdminViewSet(viewsets.ViewSet):
     def dashboard_stats(self, request):
         """2. 看板營收指標"""
         shop_id = request.query_params.get('shop_id', 1)
-        stats_data = Appointment.objects.get_dashboard_stats(shop_id)
+        provider_id = request.query_params.get('provider_id') # 💡 抓取選定的美甲師 ID
+        
+        stats_data = Appointment.objects.get_dashboard_stats(shop_id, provider_id)
         return Response(stats_data)
 
 
