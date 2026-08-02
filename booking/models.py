@@ -186,3 +186,67 @@ class ServiceRecord(models.Model):
     image_url = models.URLField(blank=True, null=True, verbose_name="成品圖網址") # 未來可串接 AWS S3 或直接存 URL
     materials_note = models.TextField(blank=True, verbose_name="材料與色號紀錄")
     created_at = models.DateTimeField(auto_now_add=True)
+
+class DesignPriceCategory(models.TextChoices):
+    BASE = 'BASE', '款式底價'
+    ADDON = 'ADDON', '加價項目'
+    STYLE = 'STYLE', '進階造型'
+    REMOVAL = 'REMOVAL', '卸甲服務'
+
+class DesignPriceItem(models.Model):
+    """
+    設計款價目表模板 (由店家在後台自由維護)
+    """
+    shop = models.ForeignKey('Shop', on_delete=models.CASCADE, related_name='design_price_items')
+    category = models.CharField(max_length=20, choices=DesignPriceCategory.choices, verbose_name="項目分類")
+    name = models.CharField(max_length=100, verbose_name="項目名稱")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="預設單價")
+    sort_order = models.PositiveIntegerField(default=0, verbose_name="顯示排序")
+    is_active = models.BooleanField(default=True, verbose_name="是否上架")
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = "設計款價目項目"
+
+    def __str__(self):
+        return f"[{self.get_category_display()}] {self.name} - ${self.price}"
+
+class AppointmentDesignQuote(models.Model):
+    """
+    預約單的設計款結帳總表 (1:1 綁定 Appointment)
+    """
+    appointment = models.OneToOneField(
+        'Appointment', 
+        on_delete=models.CASCADE, 
+        related_name='design_quote',
+        verbose_name="關聯預約單"
+    )
+    deposit = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="預收定金")
+    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="優惠折扣")
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="項目小計")
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="應付尾款")
+    formatted_receipt = models.TextField(blank=True, verbose_name="格式化明細文字快照")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # 💡 自動將算出的「應付尾款」反寫同步回 Appointment 的 final_price！
+        if self.appointment and self.appointment.final_price != self.total_amount:
+            self.appointment.final_price = self.total_amount
+            self.appointment.save(update_fields=['final_price'])
+
+
+class AppointmentDesignItem(models.Model):
+    """
+    結帳單項目明細快照 (1:N 綁定 AppointmentDesignQuote)
+    """
+    quote = models.ForeignKey(AppointmentDesignQuote, on_delete=models.CASCADE, related_name='items')
+    category = models.CharField(max_length=20, choices=DesignPriceCategory.choices, verbose_name="分類")
+    item_name = models.CharField(max_length=100, verbose_name="項目名稱快照")
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="單價快照")
+    quantity = models.PositiveIntegerField(default=1, verbose_name="數量")
+    is_custom = models.BooleanField(default=False, verbose_name="是否為現場臨時新增項目")
+
+    @property
+    def item_total(self):
+        return self.unit_price * self.quantity
