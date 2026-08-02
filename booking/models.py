@@ -3,6 +3,7 @@ import datetime
 from django.utils import timezone
 from django.db.models import Q
 from .managers import AppointmentQuerySet
+from django.core.exceptions import ObjectDoesNotExist
 
 class Shop(models.Model):
     """多租戶架構核心：店家模型"""
@@ -35,19 +36,28 @@ class Provider(models.Model):
     
     def get_available_slots(self, target_date: datetime.date, service_items, addon_items: list = None) -> list:
         """
-        計算該人員在特定日期的所有可用時段（已整合多選主服務與加購項目的時間加總）。
+        計算該人員在特定日期的所有可用時段（已整合動態班表、休息時段與多選服務總工時）。
         """
-        # 1. 取得人員當天的排班時間 (10:00 - 20:00)
-        work_start_time = datetime.time(10, 0)
-        work_end_time = datetime.time(20, 0)
-
         current_tz = timezone.get_current_timezone()
+
+        # 1. 取得該人員當天的實際排班記錄 (ProviderShift)
+        try:
+            shift = self.shifts.get(date=target_date)
+        except ObjectDoesNotExist:
+            # 如果這天完全沒有排班資料，預設視為不營業 / 無法預約
+            return []
+
+        # 如果當天公休，直接回傳空陣列
+        if shift.is_off or not shift.start_time or not shift.end_time:
+            return []
+
+        # 使用真實排班的上下班時間
         work_start_dt = timezone.make_aware(
-            datetime.datetime.combine(target_date, work_start_time), 
+            datetime.datetime.combine(target_date, shift.start_time), 
             current_tz
         )
         work_end_dt = timezone.make_aware(
-            datetime.datetime.combine(target_date, work_end_time), 
+            datetime.datetime.combine(target_date, shift.end_time), 
             current_tz
         )
 
@@ -59,37 +69,51 @@ class Provider(models.Model):
             Q(status='PENDING') | Q(status='CONFIRMED')
         ).order_by('start_time')
 
-        # 💡 3. 核心改動：防禦型加總「所有主服務」與「所有加購項」的施作時間
+        # 💡 將當天的 break_times（休息時段）轉換成帶時區的 datetime 區間物件供碰撞判定
+        break_intervals = []
+        if shift.break_times:
+            for b in shift.break_times:
+                b_start_time = datetime.datetime.strptime(b.get('start'), '%H:%M').time()
+                b_end_time = datetime.datetime.strptime(b.get('end'), '%H:%M').time()
+                
+                b_start_dt = timezone.make_aware(datetime.datetime.combine(target_date, b_start_time), current_tz)
+                b_end_dt = timezone.make_aware(datetime.datetime.combine(target_date, b_end_time), current_tz)
+                
+                break_intervals.append({'start_time': b_start_dt, 'end_time': b_end_dt})
+
+        # 3. 計算所有主服務與加購項目的總工時
         if isinstance(service_items, (list, tuple)):
             main_duration = sum(s.duration_minutes for s in service_items)
         else:
-            # 相容性防禦：如果傳進來的是單一 ServiceItem 物件也能正常運作
             main_duration = getattr(service_items, 'duration_minutes', 0)
 
         addon_duration = sum(addon.duration_minutes for addon in addon_items) if addon_items else 0
-        
         total_duration_minutes = main_duration + addon_duration
 
-        # 封裝成 timedelta 供下方迴圈掃描
         service_duration = datetime.timedelta(minutes=total_duration_minutes)
-        
-        # 設定每個可選時段的間隔點（每 30 分鐘一個預約點）
         slot_interval = datetime.timedelta(minutes=30) 
         
         available_slots = []
         current_time = work_start_dt
 
-        # 4. 時段掃描迴圈 (拿多項服務加總後的總工時進行防撞與邊界判定)
+        # 4. 時段掃描迴圈 (同時防撞「已預約訂單」與「美甲師自訂休息時段」)
         while current_time + service_duration <= work_end_dt:
             slot_start = current_time
             slot_end = current_time + service_duration
             is_overlapping = False
 
+            # A. 檢查是否與現有預約訂單碰撞
             for appt in occupied_appointments:
-                # 黃金碰撞公式
                 if slot_start < appt.end_time and slot_end > appt.start_time:
                     is_overlapping = True
                     break 
+
+            # B. 檢查是否與美甲師自訂的休息時段 (break_times) 碰撞
+            if not is_overlapping:
+                for break_item in break_intervals:
+                    if slot_start < break_item['end_time'] and slot_end > break_item['start_time']:
+                        is_overlapping = True
+                        break
 
             if not is_overlapping:
                 available_slots.append({
@@ -101,6 +125,37 @@ class Provider(models.Model):
 
         return available_slots
 
+class ProviderShift(models.Model):
+    """
+    美甲師每日班表模型
+    紀錄特定日期、特定美甲師的上班時間與公休狀態
+    """
+    provider = models.ForeignKey(
+        'Provider', 
+        on_delete=models.CASCADE, 
+        related_name='shifts',
+        verbose_name="美甲師"
+    )
+    date = models.DateField(verbose_name="排班日期")
+    start_time = models.TimeField(null=True, blank=True, verbose_name="上班時間")
+    end_time = models.TimeField(null=True, blank=True, verbose_name="下班時間")
+    is_off = models.BooleanField(default=False, verbose_name="是否公休")
+    break_times = models.JSONField(default=list, blank=True, verbose_name="當日休息時段")
+
+    class Meta:
+        verbose_name = "美甲師班表"
+        verbose_name_plural = "美甲師班表"
+        constraints = [
+            models.UniqueConstraint(fields=['provider', 'date'], name='unique_provider_date_shift')
+        ]
+        indexes = [
+            models.Index(fields=['provider', 'date']),
+        ]
+
+    def __str__(self):
+        status = "公休" if self.is_off else f"{self.start_time} - {self.end_time}"
+        return f"[{self.date}] {self.provider.name} : {status}"
+    
 class ServiceItem(models.Model):
     """服務項目模型"""
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='services')

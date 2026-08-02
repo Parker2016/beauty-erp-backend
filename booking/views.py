@@ -5,9 +5,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from .models import Shop, Provider, Appointment, ServiceItem, DesignPriceItem, AppointmentDesignQuote
+from .models import Shop, Provider, ProviderShift, Appointment, ServiceItem, DesignPriceItem, AppointmentDesignQuote
 from .serializers import (
-    ProviderSerializer, 
+    ProviderSerializer, ProviderShiftSerializer,
     AppointmentCreateSerializer, 
     AdminCalendarAppointmentSerializer, 
     AdminServiceItemSerializer, 
@@ -99,7 +99,72 @@ class ProviderViewSet(viewsets.ModelViewSet): # 💡 1. 核心修正：改為 Mo
         
         return Response(available_slots)
 
+class ProviderShiftViewSet(viewsets.ModelViewSet):
+    queryset = ProviderShift.objects.all()
+    serializer_class = ProviderShiftSerializer
 
+    def get_queryset(self):
+        queryset = ProviderShift.objects.all()
+        provider_id = self.request.query_params.get('provider_id')
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if provider_id and provider_id != 'all':
+            queryset = queryset.filter(provider_id=provider_id)
+        
+        if start_date:
+            queryset = queryset.filter(date__gte=start_date)
+            
+        if end_date:
+            queryset = queryset.filter(date__lte=end_date)
+
+        return queryset.order_by('date', 'provider_id')
+
+    @action(detail=False, methods=['post'], url_path='batch')
+    def batch_save(self, request):
+        """
+        整月批次排班 / 單日調整端點（支援 break_times 休息時段）
+        """
+        data = request.data
+        provider_id = data.get('provider_id')
+        shifts_data = data.get('shifts', [])
+
+        if not provider_id or not shifts_data:
+            return Response({"error": "請提供 provider_id 與 shifts 資料陣列"}, status=status.HTTP_400_BAD_REQUEST)
+
+        provider = get_object_or_404(Provider, id=provider_id)
+
+        try:
+            with transaction.atomic():
+                for shift_item in shifts_data:
+                    date_str = shift_item.get('date')
+                    if not date_str:
+                        continue
+
+                    is_off = shift_item.get('is_off', False)
+                    start_time = shift_item.get('start_time') if not is_off else None
+                    end_time = shift_item.get('end_time') if not is_off else None
+                    
+                    # 💡 抓取前端傳來的休息時段清單（如果是公休則清空）
+                    break_times = shift_item.get('break_times', []) if not is_off else []
+
+                    # 有則更新 (Update)，無則新增 (Create)
+                    ProviderShift.objects.update_or_create(
+                        provider=provider,
+                        date=date_str,
+                        defaults={
+                            'start_time': start_time,
+                            'end_time': end_time,
+                            'is_off': is_off,
+                            'break_times': break_times  # 💡 寫入 JSON 欄位
+                        }
+                    )
+
+            return Response({"message": "排班資料儲存成功"}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": f"排班儲存失敗: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 class AppointmentViewSet(viewsets.ModelViewSet):
     """
     預約訂單視圖 (大堂經理)
