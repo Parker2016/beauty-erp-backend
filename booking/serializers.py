@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils import timezone
 import datetime
-from .models import Shop, Customer, Provider, ServiceItem, Appointment
+from .models import Shop, Customer, Provider, ProviderShift, ServiceItem, Appointment, ServiceRecord, DesignPriceItem, AppointmentDesignQuote, AppointmentDesignItem
 
 # ==========================================
 # GET 專用：讀取嵌套 (Read Nested)
@@ -11,18 +11,24 @@ class ServiceItemSerializer(serializers.ModelSerializer):
     """服務項目，負責在 Provider 中被嵌套顯示"""
     class Meta:
         model = ServiceItem
-        # 嚴格禁止使用 '__all__'，明確列出前端需要的欄位
-        fields = ['id', 'name', 'duration_minutes', 'price', 'description']
+        fields = [
+            'id', 
+            'name', 
+            'duration_minutes', 
+            'price', 
+            'description',
+            'price_type',
+            'is_addon',
+            'category'
+        ]
 
-class ProviderListSerializer(serializers.ModelSerializer):
-    """人員列表，同時夾帶該人員能提供的服務"""
-    # 這裡的 source 對應 Model 中 ManyToManyField 的 related_name
-    services = ServiceItemSerializer(source='provided_services', many=True, read_only=True)
-    
+class ProviderSerializer(serializers.ModelSerializer):
+    """人員序列化器 (支援 CRUD 完整欄位)"""
+    shop_id = serializers.IntegerField(write_only=True, required=False, default=1)
+
     class Meta:
         model = Provider
-        fields = ['id', 'name', 'is_manager', 'services']
-
+        fields = ['id', 'name', 'is_manager', 'shop_id']
 
 # ==========================================
 # POST 專用：寫入扁平 (Write Flat) 與防超賣驗證
@@ -30,41 +36,101 @@ class ProviderListSerializer(serializers.ModelSerializer):
 
 class AppointmentCreateSerializer(serializers.ModelSerializer):
     """
-    前端建立預約專用。
-    只接收 ID 與開始時間，結束時間由後端強制推導，杜絕前端假造資料。
+    前端建立預約專用（支援 LINE UID 自動建檔與多選服務）
     """
     provider_id = serializers.IntegerField(write_only=True)
-    service_id = serializers.IntegerField(write_only=True)
-    customer_id = serializers.IntegerField(write_only=True) 
-    # 未來導入 LINE 登入後，customer_id 可以改由 View 層從 request.user 自動提取，這裡先保留欄位
+    
+    # 💡 1. 配合你的 Model，改收 line_uid
+    line_uid = serializers.CharField(write_only=True)
+    customer_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    customer_phone = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    customer_email = serializers.EmailField(write_only=True, required=False, allow_blank=True)
+    
+    service_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True
+    )
+    
+    addon_ids = serializers.ListField(
+        child=serializers.IntegerField(), 
+        write_only=True, 
+        required=False, 
+        default=list
+    )
 
     class Meta:
         model = Appointment
         fields = [
-            'id', 'provider_id', 'service_id', 'customer_id', 
-            'start_time', 'memo', 'status'
+            'id', 'provider_id', 'service_ids', 'addon_ids', 
+            'line_uid', 'customer_name', 'customer_phone', 'customer_email',
+            'start_time', 'memo', 'status', 'final_price'
         ]
-        read_only_fields = ['id', 'status'] # status 預設會是 PENDING，不讓前端傳入
+        read_only_fields = ['id', 'status', 'final_price']
 
     def validate(self, data):
-        """
-        Serializer 的靈魂：防呆與商業邏輯驗證
-        """
+        # 1. 驗證美甲師是否存在，並順便抓出所屬的 shop
         try:
             provider = Provider.objects.get(id=data['provider_id'])
-            service = ServiceItem.objects.get(id=data['service_id'])
-            customer = Customer.objects.get(id=data['customer_id'])
-        except (Provider.DoesNotExist, ServiceItem.DoesNotExist, Customer.DoesNotExist):
-            raise serializers.ValidationError("傳入的 ID 不存在 (人員、服務或會員)")
+        except Provider.DoesNotExist:
+            raise serializers.ValidationError({"provider_id": "傳入的美甲師 ID 不存在。"})
 
-        data['shop'] = provider.shop
+        shop = provider.shop
+        data['shop'] = shop
 
-        # 1. 自動推導 end_time
+        # 2. 取得 LINE UID 並處理會員自動建檔 (Upsert 邏輯)
+        line_uid = data.get('line_uid')
+        name = data.get('customer_name', 'LINE 貴賓')
+        phone = data.get('customer_phone', None)
+        email = data.get('customer_email', None)
+
+        if not line_uid:
+            raise serializers.ValidationError({"line_uid": "缺少 LINE UID 識別碼。"})
+
+        customer = Customer.objects.filter(shop=shop, line_uid=line_uid).first()
+
+        if customer:
+            # 如果找得到，直接更新她的資料
+            customer.name = name if name else customer.name
+            customer.phone = phone if phone else customer.phone
+            customer.email = email if email else customer.email
+            customer.save()
+        else:
+            # 如果找不到該 line_uid，才檢查有沒有人佔用了這個 phone
+            if phone and Customer.objects.filter(shop=shop, phone=phone).exists():
+                # 如果電話被別人佔用了，你可以選擇噴出精準的錯誤提示
+                raise serializers.ValidationError({"customer_phone": "此手機號碼已經被其他會員綁定！"})
+            
+            # 否則安全建立新會員
+            customer = Customer.objects.create(
+                shop=shop,
+                line_uid=line_uid,
+                name=name if name else 'LINE 貴賓',
+                phone=phone,
+                email=email
+            )
+        
+        data['customer'] = customer
+
+        # 3. 驗證主服務項目
+        service_ids = data.get('service_ids', [])
+        if not service_ids:
+            raise serializers.ValidationError({"service_ids": "請至少選擇一項主服務項目。"})
+
+        services = list(ServiceItem.objects.filter(id__in=service_ids, is_addon=False))
+        if len(services) != len(service_ids):
+            raise serializers.ValidationError({"service_ids": "部分主服務項目不存在或為加購品項。"})
+
+        # 4. 驗證加購項目
+        addon_ids = data.get('addon_ids', [])
+        addon_items = list(ServiceItem.objects.filter(id__in=addon_ids, is_addon=True))
+        if len(addon_items) != len(addon_ids):
+            raise serializers.ValidationError({"addon_ids": "部分加購項目不存在或非合法加購品項。"})
+
+        # 5. 總工時計算與防超賣碰撞檢查
+        total_duration_minutes = sum(s.duration_minutes for s in services) + sum(addon.duration_minutes for addon in addon_items)
         start_time = data['start_time']
-        end_time = start_time + datetime.timedelta(minutes=service.duration_minutes)
+        end_time = start_time + datetime.timedelta(minutes=total_duration_minutes)
 
-        # 2. 終極防超賣檢查 (Double Check)
-        # 雖然前端已經透過 get_available_slots 過濾了，但送出瞬間可能會有併發(Concurrency)
         overlapping = Appointment.objects.filter(
             provider=provider,
             start_time__lt=end_time,
@@ -73,20 +139,43 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
         ).exists()
 
         if overlapping:
-            raise serializers.ValidationError({"start_time": "手腳太慢啦！這個時段剛剛被其他人預約了，請重新選擇。"})
+            raise serializers.ValidationError({"start_time": "手腳太慢啦！這個時段剛剛被其他人預約了。"})
 
-        # 3. 把物件塞回 data，供 View 執行 .save() 時使用
+        # 6. 金額預算
+        has_quote_service = any(getattr(s, 'price_type', None) == 'QUOTE' for s in services)
+        if has_quote_service:
+            data['final_price'] = None
+        else:
+            data['final_price'] = sum(s.price for s in services) + sum(addon.price for addon in addon_items)
+
+        # 7. 清理暫存欄位並賦予關聯
         data['end_time'] = end_time
         data['provider'] = provider
-        data['service'] = service
-        data['customer'] = customer
-        
-        # 為了不讓 Django ORM 報錯，把純 ID 欄位清掉
+        data['services_to_save'] = services
+        data['addons_to_save'] = addon_items 
+
         data.pop('provider_id')
-        data.pop('service_id')
-        data.pop('customer_id')
+        data.pop('service_ids')
+        data.pop('line_uid', None)
+        data.pop('customer_name', None)
+        data.pop('customer_phone', None)
+        data.pop('customer_email', None)
+        data.pop('addon_ids', None)
 
         return data
+
+    def create(self, validated_data):
+        services = validated_data.pop('services_to_save', [])
+        addon_items = validated_data.pop('addons_to_save', [])
+        
+        appointment = Appointment.objects.create(**validated_data)
+        
+        if services:
+            appointment.services.set(services)
+        if addon_items:
+            appointment.addons.set(addon_items)
+            
+        return appointment
     
 class AdminCalendarCustomerSerializer(serializers.ModelSerializer):
     """管理端專用：客人基本資料"""
@@ -105,14 +194,16 @@ class AdminCalendarAppointmentSerializer(serializers.ModelSerializer):
     管理端行事曆專用：高密度嵌套讀取
     """
     customer = AdminCalendarCustomerSerializer(read_only=True)
-    service = AdminCalendarServiceItemSerializer(read_only=True)
+    services = AdminCalendarServiceItemSerializer(many=True, read_only=True)
+    addons = AdminCalendarServiceItemSerializer(many=True, read_only=True)
     provider_name = serializers.CharField(source='provider.name', read_only=True)
 
     class Meta:
         model = Appointment
         fields = [
-            'id', 'customer', 'service', 'provider_name',
-            'start_time', 'end_time', 'status', 'memo'
+            'id', 'customer', 'services', 'provider_name',
+            'start_time', 'end_time', 'status', 'memo',
+            'addons', 'final_price'
         ]
 
 class AdminProviderOptionSerializer(serializers.ModelSerializer):
@@ -123,9 +214,9 @@ class AdminProviderOptionSerializer(serializers.ModelSerializer):
 
 class AdminServiceItemSerializer(serializers.ModelSerializer):
     """
-    管理後台服務品項 CRUD 專用 Serializer
+    管理後台服務品項 CRUD 專用 Serializer (完全體：支援彈性計價與加購分類)
     """
-    # 讀取時：嵌套美甲師物件列表
+    # 讀取時：嵌套美甲師基本物件列表
     providers = AdminProviderOptionSerializer(many=True, read_only=True)
     
     # 寫入時：接收純數字陣列 (例如 [1, 2])，不與 Model 欄位直接衝突
@@ -140,7 +231,11 @@ class AdminServiceItemSerializer(serializers.ModelSerializer):
         model = ServiceItem
         fields = [
             'id', 'name', 'duration_minutes', 'price', 
-            'description', 'providers', 'provider_ids'
+            'description', 'providers', 'provider_ids',
+            # 💡 核心補強：釋放新欄位給後台管理介面進行寫入與修改
+            'price_type',  # 💸 FIXED (固定) / STARTING (起價) / QUOTE (現場報價)
+            'is_addon',    # ➕ True (加購項目) / False (主服務)
+            'category'     # 💅 HAND (手部) / FOOT (足部) / PURE_REMOVAL (純卸甲) / ADDON (加購)
         ]
         read_only_fields = ['id']
 
@@ -148,7 +243,7 @@ class AdminServiceItemSerializer(serializers.ModelSerializer):
         # 1. 剝離出多對多的美甲師 ID 陣列
         provider_ids = validated_data.pop('provider_ids', [])
         
-        # 2. 建立服務品項本體 (shop_id 會由 View 層在呼叫 save() 時注入)
+        # 2. 建立服務品項本體 (validated_data 此時會自動包含新加入的 price_type, is_addon, category)
         service_item = ServiceItem.objects.create(**validated_data)
         
         # 3. 同步寫入多對多關聯資料庫
@@ -162,7 +257,7 @@ class AdminServiceItemSerializer(serializers.ModelSerializer):
         # 1. 剝離出多對多的美甲師 ID 陣列
         provider_ids = validated_data.pop('provider_ids', None)
         
-        # 2. 更新服務品項本體欄位
+        # 2. 更新服務品項本體欄位 (super().update 會自動處理常規欄位的覆蓋)
         instance = super().update(instance, validated_data)
         
         # 3. 如果前端有傳這個陣列，就覆蓋更新多對多關聯
@@ -171,3 +266,196 @@ class AdminServiceItemSerializer(serializers.ModelSerializer):
             instance.providers.set(providers)
             
         return instance
+
+class AdminServiceRecordSerializer(serializers.ModelSerializer):
+    """施作紀錄的扁平轉譯器"""
+    id = serializers.IntegerField(required=False, allow_null=True)
+
+    class Meta:
+        model = ServiceRecord
+        # 對齊前端傳入的材料色號與作品照網址
+        fields = ['id', 'materials_note', 'image_url']
+
+
+class AdminAppointmentWithRecordSerializer(serializers.ModelSerializer):
+    """
+    業主後台專用：預約狀態、多選主服務與施作紀錄的「一對一/多對多聯合寫入」序列化器 (完全體對齊版)
+    """
+    record = AdminServiceRecordSerializer(required=False, allow_null=True)
+    
+    # 💡 1. 補齊：嵌套 customer 物件 (包含 id, name, phone)，讓 Modal 能顯示顧客電話
+    customer = AdminCalendarCustomerSerializer(read_only=True)
+    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    
+    # 💡 2. 補齊：擔當美甲師名稱
+    provider_name = serializers.CharField(source='provider.name', read_only=True)
+
+    # 💡 3. 嵌套多選服務與加購項目 (採用帶有 price, duration_minutes 的 ServiceItemSerializer)
+    services = ServiceItemSerializer(many=True, read_only=True)
+    addons = ServiceItemSerializer(many=True, read_only=True)
+
+    # 💡 4. 多對多主服務：接收前端 Modal 傳入的 ID 陣列 (例如 service_ids: [1, 2])
+    service_ids = serializers.PrimaryKeyRelatedField(
+        queryset=ServiceItem.objects.all(),
+        many=True,
+        write_only=True,
+        required=False,
+        source='services'
+    )
+
+    class Meta:
+        model = Appointment
+        # 💡 全面對齊 AdminCalendarAppointmentSerializer 所需的所有完整欄位
+        fields = [
+            'id', 
+            'customer',        # 包含 name, phone 的顧客物件
+            'customer_name',   # 平鋪版顧客姓名 (備用相容)
+            'provider_name',   # 擔當美甲師名稱
+            'services',        # 多選主服務陣列 (含 price, duration_minutes)
+            'service_ids',     # 寫入用：服務 ID 陣列
+            'addons',          # 多選加購陣列 (含 price, duration_minutes)
+            'start_time',      # 開始時間
+            'status',          # 預約狀態
+            'memo',            # 客戶留言備註
+            'final_price',     # 現場結帳實收金額
+            'record'           # 1:1 施作紀錄 (色號、款式照片)
+        ]
+
+    def update(self, instance, validated_data):
+        # 抽出多對多 services 與一對一 record 的資料
+        services_data = validated_data.pop('services', None)
+        record_data = validated_data.pop('record', None)
+
+        # 1. 更新 Appointment 本身的基本欄位 (包含 status, start_time, final_price)
+        instance.status = validated_data.get('status', instance.status)
+        instance.start_time = validated_data.get('start_time', instance.start_time)
+        instance.end_time = validated_data.get('end_time', instance.end_time)
+        instance.memo = validated_data.get('memo', instance.memo)
+        instance.final_price = validated_data.get('final_price', instance.final_price)
+        instance.save()
+
+        # 2. 更新多對多主服務項目 (ManyToManyField)
+        if services_data is not None:
+            instance.services.set(services_data)  # 用 .set() 覆蓋全新的服務項目組合
+
+        # 3. 處理一對一 ServiceRecord 的生命週期
+        if record_data is not None:
+            materials_note = record_data.get('materials_note', '')
+            image_url = record_data.get('image_url', '')
+
+            ServiceRecord.objects.update_or_create(
+                appointment=instance,
+                defaults={
+                    'materials_note': materials_note,
+                    'image_url': image_url
+                }
+            )
+
+        return instance
+
+# ==========================================
+# 1. 價目表模板管理 (Shop Settings)
+# ==========================================
+class DesignPriceItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DesignPriceItem
+        fields = ['id', 'category', 'name', 'price', 'sort_order', 'is_active']
+
+# ==========================================
+# 2. 結帳明細快照 (Quote Items)
+# ==========================================
+class AppointmentDesignItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppointmentDesignItem
+        # 排除 quote，因為寫入時會由父層 (Quote) 自動綁定
+        exclude = ['quote'] 
+
+# ==========================================
+# 3. 結帳總表快照 (Quote Master)
+# ==========================================
+class AppointmentDesignQuoteSerializer(serializers.ModelSerializer):
+    # 💡 宣告嵌套的明細序列化器，many=True 代表這是一個陣列
+    items = AppointmentDesignItemSerializer(many=True)
+
+    class Meta:
+        model = AppointmentDesignQuote
+        fields = [
+            'id', 'appointment', 'deposit', 'discount', 
+            'subtotal', 'total_amount', 'formatted_receipt', 'items'
+        ]
+        # appointment 設為唯讀，由 URL 或 View 邏輯中帶入，防止被惡意竄改
+        read_only_fields = ['appointment']
+
+    def update(self, instance, validated_data):
+        """
+        處理覆寫/更新結帳快照 (Update)
+        """
+        # 1. 將 items 陣列從驗證資料中抽離出來
+        items_data = validated_data.pop('items', [])
+
+        # 2. 更新主表 Quote 的基本欄位 (金額、明細文字)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # 3. 處理快證明細：先清空舊的明細，再重新建立新的 (Snapshot 特性)
+        instance.items.all().delete()
+        for item_data in items_data:
+            AppointmentDesignItem.objects.create(quote=instance, **item_data)
+
+        return instance
+
+    def create(self, validated_data):
+        """
+        處理首次建立結帳快照 (Create)
+        """
+        items_data = validated_data.pop('items', [])
+        # 從 context 取得綁定的預約單 (View 裡面會傳入)
+        appointment = self.context['appointment']
+        
+        # 建立主表
+        quote = AppointmentDesignQuote.objects.create(appointment=appointment, **validated_data)
+        
+        # 建立明細
+        for item_data in items_data:
+            AppointmentDesignItem.objects.create(quote=quote, **item_data)
+            
+        return quote
+
+class ProviderShiftSerializer(serializers.ModelSerializer):
+    """
+    美甲師班表序列化器（包含支援當日自訂休息時段 break_times）
+    """
+    class Meta:
+        model = ProviderShift
+        fields = ['id', 'provider', 'date', 'start_time', 'end_time', 'is_off', 'break_times']
+        read_only_fields = ['id']
+
+    def validate(self, data):
+        """
+        防呆驗證：
+        1. 如果不是公休，上班時間必須早於下班時間。
+        2. 檢查 break_times 格式是否合法。
+        """
+        is_off = data.get('is_off', False)
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        break_times = data.get('break_times', [])
+
+        if not is_off:
+            if not start_time or not end_time:
+                raise serializers.ValidationError("上班日必須填寫完整的上班與下班時間。")
+            if start_time >= end_time:
+                raise serializers.ValidationError("上班時間必須早於下班時間。")
+            
+            # 💡 驗證自訂休息時段格式
+            if isinstance(break_times, list):
+                for b in break_times:
+                    b_start = b.get('start')
+                    b_end = b.get('end')
+                    if b_start and b_end and b_start >= b_end:
+                        raise serializers.ValidationError("休息時段的開始時間必須早於結束時間。")
+            else:
+                raise serializers.ValidationError("break_times 必須為陣列格式。")
+        
+        return data
