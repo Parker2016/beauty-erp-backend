@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils import timezone
 import datetime
-from .models import Shop, Customer, Provider, ServiceItem, Appointment, ServiceRecord
+from .models import Shop, Customer, Provider, ServiceItem, Appointment, ServiceRecord, DesignPriceItem, AppointmentDesignQuote, AppointmentDesignItem
 
 # ==========================================
 # GET 專用：讀取嵌套 (Read Nested)
@@ -285,7 +285,6 @@ class AdminAppointmentWithRecordSerializer(serializers.ModelSerializer):
             'service_ids',     # 寫入用：服務 ID 陣列
             'addons',          # 多選加購陣列 (含 price, duration_minutes)
             'start_time',      # 開始時間
-            'end_time',        # 結束時間
             'status',          # 預約狀態
             'memo',            # 客戶留言備註
             'final_price',     # 現場結帳實收金額
@@ -323,3 +322,72 @@ class AdminAppointmentWithRecordSerializer(serializers.ModelSerializer):
             )
 
         return instance
+
+# ==========================================
+# 1. 價目表模板管理 (Shop Settings)
+# ==========================================
+class DesignPriceItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DesignPriceItem
+        fields = ['id', 'category', 'name', 'price', 'sort_order', 'is_active']
+
+# ==========================================
+# 2. 結帳明細快照 (Quote Items)
+# ==========================================
+class AppointmentDesignItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppointmentDesignItem
+        # 排除 quote，因為寫入時會由父層 (Quote) 自動綁定
+        exclude = ['quote'] 
+
+# ==========================================
+# 3. 結帳總表快照 (Quote Master)
+# ==========================================
+class AppointmentDesignQuoteSerializer(serializers.ModelSerializer):
+    # 💡 宣告嵌套的明細序列化器，many=True 代表這是一個陣列
+    items = AppointmentDesignItemSerializer(many=True)
+
+    class Meta:
+        model = AppointmentDesignQuote
+        fields = [
+            'id', 'appointment', 'deposit', 'discount', 
+            'subtotal', 'total_amount', 'formatted_receipt', 'items'
+        ]
+        # appointment 設為唯讀，由 URL 或 View 邏輯中帶入，防止被惡意竄改
+        read_only_fields = ['appointment']
+
+    def update(self, instance, validated_data):
+        """
+        處理覆寫/更新結帳快照 (Update)
+        """
+        # 1. 將 items 陣列從驗證資料中抽離出來
+        items_data = validated_data.pop('items', [])
+
+        # 2. 更新主表 Quote 的基本欄位 (金額、明細文字)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # 3. 處理快證明細：先清空舊的明細，再重新建立新的 (Snapshot 特性)
+        instance.items.all().delete()
+        for item_data in items_data:
+            AppointmentDesignItem.objects.create(quote=instance, **item_data)
+
+        return instance
+
+    def create(self, validated_data):
+        """
+        處理首次建立結帳快照 (Create)
+        """
+        items_data = validated_data.pop('items', [])
+        # 從 context 取得綁定的預約單 (View 裡面會傳入)
+        appointment = self.context['appointment']
+        
+        # 建立主表
+        quote = AppointmentDesignQuote.objects.create(appointment=appointment, **validated_data)
+        
+        # 建立明細
+        for item_data in items_data:
+            AppointmentDesignItem.objects.create(quote=quote, **item_data)
+            
+        return quote

@@ -1,10 +1,11 @@
 # booking/views.py
 import datetime
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
-from .models import Provider, Appointment, ServiceItem  
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from .models import Shop, Provider, Appointment, ServiceItem, DesignPriceItem, AppointmentDesignQuote
 from .serializers import (
     ProviderSerializer, 
     AppointmentCreateSerializer, 
@@ -12,7 +13,8 @@ from .serializers import (
     AdminServiceItemSerializer, 
     AdminProviderOptionSerializer, 
     AdminAppointmentWithRecordSerializer,
-    ServiceItemSerializer
+    ServiceItemSerializer,
+    DesignPriceItemSerializer, AppointmentDesignQuoteSerializer
 )
 
 
@@ -181,3 +183,122 @@ class AdminAppointmentRecordViewSet(viewsets.ModelViewSet):
             .select_related('customer', 'provider')\
             .prefetch_related('services', 'addons', 'record')\
             .order_by('-id')
+
+class DesignPriceItemViewSet(viewsets.ModelViewSet):
+    """
+    美甲店設計款菜單維護 API
+    GET, POST, PUT, DELETE /api/admin/design-prices/
+    """
+    serializer_class = DesignPriceItemSerializer
+
+    def get_queryset(self):
+        # 依照前端帶入的 shop_id 進行過濾 (預設 1)
+        shop_id = self.request.query_params.get('shop_id', 1)
+        return DesignPriceItem.objects.filter(shop_id=shop_id).order_by('category', 'sort_order')
+
+    def perform_create(self, serializer):
+        # 新增時自動綁定店舖
+        shop_id = self.request.query_params.get('shop_id', 1)
+        serializer.save(shop_id=shop_id)
+
+    # =========================================================================
+    # 💡 新增：對應前端 batchUpdateDesignPrices 的批次處理端點
+    # 對應路由: POST /api/admin/design-prices/batch/
+    # =========================================================================
+    @action(detail=False, methods=['post'], url_path='batch')
+    def batch_update(self, request):
+        data = request.data
+        shop_id = data.get('shop_id', 1)
+        deleted_ids = data.get('deleted_ids', [])
+        items_data = data.get('items', [])
+
+        shop = get_object_or_404(Shop, id=shop_id)
+
+        try:
+            with transaction.atomic():
+                # 1. 批次刪除
+                if deleted_ids:
+                    DesignPriceItem.objects.filter(shop=shop, id__in=deleted_ids).delete()
+
+                # 2. 批次新增與更新
+                for item in items_data:
+                    item_id = item.get('id')
+                    
+                    if item_id:
+                        # 更新已存在項目
+                        try:
+                            db_item = DesignPriceItem.objects.get(shop=shop, id=item_id)
+                            db_item.category = item.get('category', db_item.category)
+                            db_item.name = item.get('name', db_item.name)
+                            db_item.price = item.get('price', db_item.price)
+                            db_item.sort_order = item.get('sort_order', db_item.sort_order)
+                            db_item.is_active = item.get('is_active', db_item.is_active)
+                            db_item.save()
+                        except DesignPriceItem.DoesNotExist:
+                            continue 
+                    else:
+                        # 新增項目
+                        if item.get('name') and item.get('category'):
+                            DesignPriceItem.objects.create(
+                                shop=shop,
+                                category=item.get('category'),
+                                name=item.get('name'),
+                                price=item.get('price', 0),
+                                sort_order=item.get('sort_order', 1),
+                                is_active=item.get('is_active', True)
+                            )
+
+            return Response({'message': '批次更新成功'}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'error': '批次更新失敗，請檢查資料格式'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AppointmentDesignQuoteViewSet(viewsets.ViewSet):
+    """
+    單一預約單的結帳快照 API 
+    因為這與 Appointment 是一對一，用自訂 ViewSet 處理 Retrieve 與 Save 會更乾淨。
+    """
+
+    def retrieve(self, request, appointment_id=None):
+        """
+        取得特定預約單的結帳快照
+        GET /api/admin/appointments/{appointment_id}/quote/
+        """
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+        
+        try:
+            quote = appointment.design_quote
+            serializer = AppointmentDesignQuoteSerializer(quote)
+            return Response(serializer.data)
+        except AppointmentDesignQuote.DoesNotExist:
+            # 如果這張單還沒有結帳紀錄，回傳 404 或空資料讓前端初始化
+            return Response({"detail": "尚無結帳紀錄", "has_quote": False}, status=status.HTTP_404_NOT_FOUND)
+
+    def save_quote(self, request, appointment_id=None):
+        """
+        新增或覆寫結帳快照 (使用 PUT 或 POST 皆可)
+        PUT /api/admin/appointments/{appointment_id}/quote/
+        """
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+        
+        # 檢查是否已有快照
+        if hasattr(appointment, 'design_quote'):
+            # 更新現有快照
+            serializer = AppointmentDesignQuoteSerializer(
+                appointment.design_quote, 
+                data=request.data, 
+                partial=True
+            )
+        else:
+            # 建立新快照，並透過 context 把 appointment 傳進 Serializer
+            serializer = AppointmentDesignQuoteSerializer(
+                data=request.data, 
+                context={'appointment': appointment}
+            )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

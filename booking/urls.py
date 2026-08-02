@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProviderViewSet, AppointmentViewSet, MerchantAdminViewSet, AdminServiceItemViewSet, AdminAppointmentRecordViewSet
+from .views import ProviderViewSet, AppointmentViewSet, MerchantAdminViewSet, AdminServiceItemViewSet, AdminAppointmentRecordViewSet, DesignPriceItemViewSet, AppointmentDesignQuoteViewSet
 
 # 建立路由器
 router = DefaultRouter()
@@ -11,8 +11,16 @@ router.register(r'appointments', AppointmentViewSet, basename='appointment')
 router.register(r'admin/appointments-records', AdminAppointmentRecordViewSet, basename='admin-appointments-records')
 router.register(r'admin', MerchantAdminViewSet, basename='merchant-admin')
 router.register(r'admin/services', AdminServiceItemViewSet, basename='admin-services')
+router.register(r'admin/design-prices', DesignPriceItemViewSet, basename='admin-design-prices')
 
 # 所有的 API 路徑都會自動被 router 產生
 urlpatterns = [
     path('', include(router.urls)),
+    path('admin/appointments/<int:appointment_id>/quote/', 
+         AppointmentDesignQuoteViewSet.as_view({
+             'get': 'retrieve',
+             'put': 'save_quote',
+             'post': 'save_quote'
+         }), 
+         name='appointment-quote'),
 ]
