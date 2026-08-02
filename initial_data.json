@@ -1,0 +1,3236 @@
+[
+{
+    "model": "auth.user",
+    "fields": {
+        "password": "pbkdf2_sha256$600000$fEp9bqBafhxQXmisnJDcG6$pcxselJd4vllx8b1dIleu8e3sRU2w+KFS1800qTQ5Rg=",
+        "last_login": "2026-06-14T12:56:53.847Z",
+        "is_superuser": true,
+        "username": "barneywang",
+        "first_name": "",
+        "last_name": "",
+        "email": "sadsong0804@gmail.com",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2026-06-14T12:55:57.943Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "fields": {
+        "password": "pbkdf2_sha256$600000$gjsCnHSTOYdoJYwPGV6IHU$8+FyyCPPP+mNzgXtfHleHk4Oc9+Kdm4dCAMNKlgPm6M=",
+        "last_login": "2026-07-18T09:13:54.091Z",
+        "is_superuser": true,
+        "username": "barneybear",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2026-07-18T09:13:31.551Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "fields": {
+        "password": "pbkdf2_sha256$600000$OHEGaKFXbfE84HNnUEbmkV$/yBxQ66CspxVqW0Ad9NT+4sGVWv9rDMKI861OBncMxE=",
+        "last_login": "2026-08-02T04:50:35.164Z",
+        "is_superuser": true,
+        "username": "barney",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2026-08-02T04:50:16.123Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "3mwvhan27n6ebee23jpsho0hu2do4xgn",
+    "fields": {
+        "session_data": ".eJxVjEEOgjAQRe_StWnGdgrUpXvOQKYzU4saSCisjHdXEha6_e-9_zIDbWsZtqrLMIq5GGdOv1sifui0A7nTdJstz9O6jMnuij1otf0s-rwe7t9BoVq-dWDfgSKixszYEEAMPjtohVIK5CULZOrOisCBGsBWlbhjTxhiVGfeH-vdOFY:1wl17K:UZbQKpOaXZ8b_3JAsOBcRYh5QsB5NUdUEMAgNgeDJRY",
+        "expire_date": "2026-08-01T09:13:54.092Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "7x5lk7qcxb6rxyy9zs7pgeqs73rg23cw",
+    "fields": {
+        "session_data": ".eJxVjDsOwjAQBe_iGlmO47UdSvqcwdr1bnAAOVI-FeLuJFIKaN_MvLdKuK0lbYvMaWR1Va26_G6E-Sn1APzAep90nuo6j6QPRZ900f3E8rqd7t9BwaXstQzGOI4QiGwUih6JEbBpcug8gaABNpHB7mRgRxDF5wBN65xF7Eh9vv2xOFw:1wqO9j:__h7qxWNcsG2Ymh_JiTeoGXCxA7H1mFb9nw9DhqmKJo",
+        "expire_date": "2026-08-16T04:50:35.165Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "m5ndl3u4p0bfie9m32oj6a4lr74cnzeh",
+    "fields": {
+        "session_data": ".eJxVjDsOwjAQBe_iGlkb_Kek5wzWetfGAeRIcVIh7k4ipYD2zcx7i4jrUuPa8xxHFhcxiNPvlpCeue2AH9juk6SpLfOY5K7Ig3Z5mzi_rof7d1Cx160-IxUHDjObhKUkoyx5MmFwwI4AUHNIJSjrYRMUOq3Rg7fIioiVEZ8vB1s4hw:1wYkOT:Mxg5ioYHsUQyhxrE1ZYDiZP-C7--3QKFdnzZc2j-d-E",
+        "expire_date": "2026-06-28T12:56:53.848Z"
+    }
+},
+{
+    "model": "booking.shop",
+    "pk": 1,
+    "fields": {
+        "name": "Z. Studio",
+        "created_at": "2026-06-14T12:57:56.486Z"
+    }
+},
+{
+    "model": "booking.customer",
+    "pk": 3,
+    "fields": {
+        "shop": 1,
+        "phone": "0976725323",
+        "line_uid": "U1db56574326ddaa4f605c415caf56ee8",
+        "name": "Barney",
+        "email": "sadsong0804@gmail.com",
+        "created_at": "2026-08-02T10:21:18.718Z"
+    }
+},
+{
+    "model": "booking.provider",
+    "pk": 1,
+    "fields": {
+        "shop": 1,
+        "name": "Zoe",
+        "is_manager": true
+    }
+},
+{
+    "model": "booking.provider",
+    "pk": 2,
+    "fields": {
+        "shop": 1,
+        "name": "Katy",
+        "is_manager": false
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 1,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-01",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": [
+            {
+                "start": "14:00",
+                "end": "15:00"
+            }
+        ]
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 2,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-02",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 3,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-03",
+        "start_time": null,
+        "end_time": null,
+        "is_off": true,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 4,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-04",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 5,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-05",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 6,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-06",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 7,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-07",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 8,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-08",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 9,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-09",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 10,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-10",
+        "start_time": null,
+        "end_time": null,
+        "is_off": true,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 11,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-11",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 12,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-12",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 13,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-13",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 14,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-14",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 15,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-15",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 16,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-16",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 17,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-17",
+        "start_time": null,
+        "end_time": null,
+        "is_off": true,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 18,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-18",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 19,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-19",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 20,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-20",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 21,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-21",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 22,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-22",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 23,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-23",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 24,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-24",
+        "start_time": null,
+        "end_time": null,
+        "is_off": true,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 25,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-25",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 26,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-26",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 27,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-27",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 28,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-28",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 29,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-29",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 30,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-30",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 31,
+    "fields": {
+        "provider": 2,
+        "date": "2026-08-31",
+        "start_time": null,
+        "end_time": null,
+        "is_off": true,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 32,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-01",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": [
+            {
+                "start": "13:00",
+                "end": "15:00"
+            }
+        ]
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 33,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-02",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": [
+            {
+                "start": "14:00",
+                "end": "15:00"
+            }
+        ]
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 34,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-03",
+        "start_time": null,
+        "end_time": null,
+        "is_off": true,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 35,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-04",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 36,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-05",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 37,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-06",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 38,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-07",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 39,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-08",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 40,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-09",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 41,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-10",
+        "start_time": null,
+        "end_time": null,
+        "is_off": true,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 42,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-11",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 43,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-12",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 44,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-13",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 45,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-14",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 46,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-15",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 47,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-16",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 48,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-17",
+        "start_time": null,
+        "end_time": null,
+        "is_off": true,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 49,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-18",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 50,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-19",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 51,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-20",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 52,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-21",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 53,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-22",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 54,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-23",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 55,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-24",
+        "start_time": null,
+        "end_time": null,
+        "is_off": true,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 56,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-25",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 57,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-26",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 58,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-27",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 59,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-28",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 60,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-29",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 61,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-30",
+        "start_time": "11:30:00",
+        "end_time": "20:00:00",
+        "is_off": false,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.providershift",
+    "pk": 62,
+    "fields": {
+        "provider": 1,
+        "date": "2026-08-31",
+        "start_time": null,
+        "end_time": null,
+        "is_off": true,
+        "break_times": []
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 1,
+    "fields": {
+        "shop": 1,
+        "name": "卸甲",
+        "description": "呵呵呵",
+        "duration_minutes": 30,
+        "price": "300",
+        "is_addon": false,
+        "price_type": "FIXED",
+        "category": "PURE_REMOVAL",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 2,
+    "fields": {
+        "shop": 1,
+        "name": "漸層",
+        "description": "",
+        "duration_minutes": 60,
+        "price": "1000",
+        "is_addon": false,
+        "price_type": "FIXED",
+        "category": "HAND",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 3,
+    "fields": {
+        "shop": 1,
+        "name": "鏡面",
+        "description": "",
+        "duration_minutes": 120,
+        "price": "3000",
+        "is_addon": false,
+        "price_type": "FIXED",
+        "category": "HAND",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 4,
+    "fields": {
+        "shop": 1,
+        "name": "單色",
+        "description": "",
+        "duration_minutes": 30,
+        "price": "500",
+        "is_addon": false,
+        "price_type": "FIXED",
+        "category": "HAND",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 5,
+    "fields": {
+        "shop": 1,
+        "name": "貓眼",
+        "description": "",
+        "duration_minutes": 120,
+        "price": "1500",
+        "is_addon": false,
+        "price_type": "FIXED",
+        "category": "HAND",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 6,
+    "fields": {
+        "shop": 1,
+        "name": "法式",
+        "description": "",
+        "duration_minutes": 120,
+        "price": "3000",
+        "is_addon": false,
+        "price_type": "FIXED",
+        "category": "HAND",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 7,
+    "fields": {
+        "shop": 1,
+        "name": "設計款(需報價)",
+        "description": "",
+        "duration_minutes": 120,
+        "price": "3000",
+        "is_addon": false,
+        "price_type": "QUOTE",
+        "category": "HAND",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 8,
+    "fields": {
+        "shop": 1,
+        "name": "單色",
+        "description": "",
+        "duration_minutes": 60,
+        "price": "1000",
+        "is_addon": false,
+        "price_type": "FIXED",
+        "category": "FOOT",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 9,
+    "fields": {
+        "shop": 1,
+        "name": "設計款(需報價)",
+        "description": "",
+        "duration_minutes": 120,
+        "price": "3000",
+        "is_addon": false,
+        "price_type": "QUOTE",
+        "category": "FOOT",
+        "providers": [
+            1
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 10,
+    "fields": {
+        "shop": 1,
+        "name": "延甲",
+        "description": "",
+        "duration_minutes": 30,
+        "price": "500",
+        "is_addon": true,
+        "price_type": "FIXED",
+        "category": "ADDON",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 11,
+    "fields": {
+        "shop": 1,
+        "name": "Hihi",
+        "description": "",
+        "duration_minutes": 30,
+        "price": "1000",
+        "is_addon": false,
+        "price_type": "FIXED",
+        "category": "HAND",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.serviceitem",
+    "pk": 12,
+    "fields": {
+        "shop": 1,
+        "name": "卸甲",
+        "description": "",
+        "duration_minutes": 30,
+        "price": "500",
+        "is_addon": true,
+        "price_type": "FIXED",
+        "category": "ADDON",
+        "providers": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "booking.appointment",
+    "pk": 18,
+    "fields": {
+        "shop": 1,
+        "customer": 3,
+        "provider": 1,
+        "start_time": "2026-08-02T03:30:00Z",
+        "end_time": "2026-08-02T06:00:00Z",
+        "status": "PENDING",
+        "final_price": 2500,
+        "memo": "[客戶聯絡資料]\n姓名: Barney\n電話: 0976725323\nEmail: sadsong0804@gmail.com\n生日: 未填\n\n[客人客製備註]\n無",
+        "created_at": "2026-08-02T10:21:18.722Z",
+        "updated_at": "2026-08-02T10:21:18.722Z",
+        "services": [
+            2,
+            8
+        ],
+        "addons": [
+            10
+        ]
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 3,
+    "fields": {
+        "shop": 1,
+        "category": "BASE",
+        "name": "手部單色",
+        "price": "1000.00",
+        "sort_order": 1,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 4,
+    "fields": {
+        "shop": 1,
+        "category": "BASE",
+        "name": "足部單色",
+        "price": "1000.00",
+        "sort_order": 2,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 5,
+    "fields": {
+        "shop": 1,
+        "category": "ADDON",
+        "name": "貓眼",
+        "price": "10.00",
+        "sort_order": 1,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 6,
+    "fields": {
+        "shop": 1,
+        "category": "ADDON",
+        "name": "鏡面",
+        "price": "20.00",
+        "sort_order": 2,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 7,
+    "fields": {
+        "shop": 1,
+        "category": "ADDON",
+        "name": "貓眼蹭粉",
+        "price": "30.00",
+        "sort_order": 3,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 8,
+    "fields": {
+        "shop": 1,
+        "category": "ADDON",
+        "name": "純色漸層/鏡面漸層",
+        "price": "30.00",
+        "sort_order": 4,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 9,
+    "fields": {
+        "shop": 1,
+        "category": "ADDON",
+        "name": "純色法式",
+        "price": "50.00",
+        "sort_order": 5,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 10,
+    "fields": {
+        "shop": 1,
+        "category": "ADDON",
+        "name": "貓眼法式",
+        "price": "60.00",
+        "sort_order": 6,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 11,
+    "fields": {
+        "shop": 1,
+        "category": "ADDON",
+        "name": "鏡面法式",
+        "price": "70.00",
+        "sort_order": 7,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 12,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "珍珠/鋼珠/水鑽",
+        "price": "10.00",
+        "sort_order": 1,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 13,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "亮片",
+        "price": "10.00",
+        "sort_order": 2,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 14,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "貼紙",
+        "price": "20.00",
+        "sort_order": 3,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 15,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "波點",
+        "price": "30.00",
+        "sort_order": 4,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 16,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "立體鏡面(線條造型)",
+        "price": "30.00",
+        "sort_order": 5,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 17,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "立體鏡面(整面造型)",
+        "price": "40.00",
+        "sort_order": 6,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 18,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "邊鑽/1~3顆小鑽",
+        "price": "50.00",
+        "sort_order": 7,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 19,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "豹紋/豹紋法式",
+        "price": "50.00",
+        "sort_order": 8,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 20,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "單色格紋",
+        "price": "50.00",
+        "sort_order": 9,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 21,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "雙色暈染",
+        "price": "50.00",
+        "sort_order": 10,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 22,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "雙色針織",
+        "price": "50.00",
+        "sort_order": 11,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 23,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "雙色格紋",
+        "price": "60.00",
+        "sort_order": 12,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 24,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "三色暈染",
+        "price": "60.00",
+        "sort_order": 13,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 25,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "三色針織",
+        "price": "60.00",
+        "sort_order": 14,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 26,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "三色格紋",
+        "price": "70.00",
+        "sort_order": 15,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 27,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "棋盤格",
+        "price": "70.00",
+        "sort_order": 16,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 28,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "手繪花",
+        "price": "80.00",
+        "sort_order": 17,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 29,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "軟糖膠",
+        "price": "100.00",
+        "sort_order": 18,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 30,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "滿鑽",
+        "price": "100.00",
+        "sort_order": 19,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 31,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "鋼板轉印",
+        "price": "40.00",
+        "sort_order": 20,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 32,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "局部鏡面",
+        "price": "30.00",
+        "sort_order": 21,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 33,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "亮粉漸層",
+        "price": "20.00",
+        "sort_order": 22,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 34,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "$30飾品",
+        "price": "30.00",
+        "sort_order": 23,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 35,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "$50飾品",
+        "price": "30.00",
+        "sort_order": 24,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 36,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "色鉛筆繪畫",
+        "price": "40.00",
+        "sort_order": 25,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 37,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "簡單手繪(愛心/星星/線條...)",
+        "price": "50.00",
+        "sort_order": 26,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 38,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "中等手繪(寫字/動物...)",
+        "price": "100.00",
+        "sort_order": 27,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 39,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "複雜手繪(卡通人物...)",
+        "price": "150.00",
+        "sort_order": 28,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 40,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "上層立體造型",
+        "price": "30.00",
+        "sort_order": 29,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 41,
+    "fields": {
+        "shop": 1,
+        "category": "STYLE",
+        "name": "造型膠立體造型",
+        "price": "50.00",
+        "sort_order": 30,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 42,
+    "fields": {
+        "shop": 1,
+        "category": "REMOVAL",
+        "name": "本店卸甲續作(30天內免費)",
+        "price": "100.00",
+        "sort_order": 1,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 43,
+    "fields": {
+        "shop": 1,
+        "category": "REMOVAL",
+        "name": "他店卸甲續作",
+        "price": "200.00",
+        "sort_order": 2,
+        "is_active": true
+    }
+},
+{
+    "model": "booking.designpriceitem",
+    "pk": 44,
+    "fields": {
+        "shop": 1,
+        "category": "REMOVAL",
+        "name": "本/他店純卸甲(含保養)",
+        "price": "500.00",
+        "sort_order": 3,
+        "is_active": true
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 1,
+    "fields": {
+        "action_time": "2026-06-14T12:57:56.488Z",
+        "user": [
+            "barneywang"
+        ],
+        "content_type": [
+            "booking",
+            "shop"
+        ],
+        "object_id": "1",
+        "object_repr": "Z. Studio",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 2,
+    "fields": {
+        "action_time": "2026-06-14T12:58:20.372Z",
+        "user": [
+            "barneywang"
+        ],
+        "content_type": [
+            "booking",
+            "provider"
+        ],
+        "object_id": "1",
+        "object_repr": "Zoe",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 3,
+    "fields": {
+        "action_time": "2026-06-14T12:58:31.131Z",
+        "user": [
+            "barneywang"
+        ],
+        "content_type": [
+            "booking",
+            "provider"
+        ],
+        "object_id": "2",
+        "object_repr": "Katy",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 4,
+    "fields": {
+        "action_time": "2026-06-14T12:58:54.160Z",
+        "user": [
+            "barneywang"
+        ],
+        "content_type": [
+            "booking",
+            "customer"
+        ],
+        "object_id": "1",
+        "object_repr": "WANG YU CHIEH (0976725323)",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 5,
+    "fields": {
+        "action_time": "2026-06-14T12:59:45.323Z",
+        "user": [
+            "barneywang"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "1",
+        "object_repr": "手部卸甲",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 6,
+    "fields": {
+        "action_time": "2026-06-14T13:00:53.987Z",
+        "user": [
+            "barneywang"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "1",
+        "object_repr": "WANG YU CHIEH - 手部卸甲 (06/15 12:00)",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 7,
+    "fields": {
+        "action_time": "2026-07-18T09:14:38.590Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "4",
+        "object_repr": "WANG YU CHIEH - 手部卸甲 (06/30 05:30)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 8,
+    "fields": {
+        "action_time": "2026-07-18T09:14:38.592Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "3",
+        "object_repr": "WANG YU CHIEH - 手部卸甲 (06/20 05:30)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 9,
+    "fields": {
+        "action_time": "2026-07-18T09:14:38.593Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "2",
+        "object_repr": "WANG YU CHIEH - 手部卸甲 (06/20 02:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 10,
+    "fields": {
+        "action_time": "2026-07-18T09:14:38.593Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "1",
+        "object_repr": "WANG YU CHIEH - 手部卸甲 (06/15 12:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 11,
+    "fields": {
+        "action_time": "2026-07-18T09:15:04.010Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "2",
+        "object_repr": "test1",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 12,
+    "fields": {
+        "action_time": "2026-07-19T14:11:15.006Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "1",
+        "object_repr": "卸甲",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"\\u9805\\u76ee\\u540d\\u7a31\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 13,
+    "fields": {
+        "action_time": "2026-07-19T14:11:34.838Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "2",
+        "object_repr": "test1",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"\\u662f\\u5426\\u70ba\\u52a0\\u8cfc\\u9805\", \"Category\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 14,
+    "fields": {
+        "action_time": "2026-07-19T14:11:41.212Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "3",
+        "object_repr": "測試測試2",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Category\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 15,
+    "fields": {
+        "action_time": "2026-07-19T14:12:24.637Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "4",
+        "object_repr": "單色",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 16,
+    "fields": {
+        "action_time": "2026-07-19T14:12:48.949Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "5",
+        "object_repr": "貓眼",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 17,
+    "fields": {
+        "action_time": "2026-07-19T14:13:05.578Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "3",
+        "object_repr": "鏡面",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"\\u9805\\u76ee\\u540d\\u7a31\", \"Providers\", \"Category\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 18,
+    "fields": {
+        "action_time": "2026-07-19T14:13:17.319Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "2",
+        "object_repr": "漸層",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"\\u9805\\u76ee\\u540d\\u7a31\", \"Category\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 19,
+    "fields": {
+        "action_time": "2026-07-19T14:13:44.427Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "6",
+        "object_repr": "法式",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 20,
+    "fields": {
+        "action_time": "2026-07-19T14:14:25.024Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "7",
+        "object_repr": "設計款(需報價)",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 21,
+    "fields": {
+        "action_time": "2026-07-19T14:14:52.054Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "8",
+        "object_repr": "單色",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 22,
+    "fields": {
+        "action_time": "2026-07-19T14:15:18.578Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "9",
+        "object_repr": "設計款(需報價)",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 23,
+    "fields": {
+        "action_time": "2026-07-19T14:15:39.280Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "10",
+        "object_repr": "延甲",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 24,
+    "fields": {
+        "action_time": "2026-07-19T14:26:46.842Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "9",
+        "object_repr": "設計款(需報價)",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Price type\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 25,
+    "fields": {
+        "action_time": "2026-07-19T14:26:56.204Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "7",
+        "object_repr": "設計款(需報價)",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Price type\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 26,
+    "fields": {
+        "action_time": "2026-07-19T14:30:21.462Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "2",
+        "object_repr": "漸層",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"\\u662f\\u5426\\u70ba\\u52a0\\u8cfc\\u9805\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 27,
+    "fields": {
+        "action_time": "2026-07-19T14:30:53.693Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "1",
+        "object_repr": "卸甲",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Category\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 28,
+    "fields": {
+        "action_time": "2026-07-19T14:36:04.794Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "7",
+        "object_repr": "WANG YU CHIEH - 設計款(需報價) (07/19 02:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 29,
+    "fields": {
+        "action_time": "2026-07-19T14:36:04.797Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "6",
+        "object_repr": "WANG YU CHIEH - 漸層 (07/18 03:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 30,
+    "fields": {
+        "action_time": "2026-07-19T14:36:04.798Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "5",
+        "object_repr": "WANG YU CHIEH - 卸甲 (07/18 02:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 31,
+    "fields": {
+        "action_time": "2026-07-21T15:04:31.365Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "9",
+        "object_repr": "設計款(需報價)",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Category\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 32,
+    "fields": {
+        "action_time": "2026-07-21T15:05:20.966Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "12",
+        "object_repr": "卸甲",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 33,
+    "fields": {
+        "action_time": "2026-07-21T15:05:43.776Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "serviceitem"
+        ],
+        "object_id": "12",
+        "object_repr": "卸甲",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"\\u662f\\u5426\\u70ba\\u52a0\\u8cfc\\u9805\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 34,
+    "fields": {
+        "action_time": "2026-07-21T15:26:36.345Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "11",
+        "object_repr": "WANG YU CHIEH - 無指定項目 (07/20 02:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 35,
+    "fields": {
+        "action_time": "2026-07-21T15:26:36.348Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "10",
+        "object_repr": "WANG YU CHIEH - 無指定項目 (07/19 06:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 36,
+    "fields": {
+        "action_time": "2026-07-21T15:26:36.349Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "9",
+        "object_repr": "WANG YU CHIEH - 無指定項目 (07/19 04:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 37,
+    "fields": {
+        "action_time": "2026-07-21T15:26:36.350Z",
+        "user": [
+            "barneybear"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "8",
+        "object_repr": "WANG YU CHIEH - 無指定項目 (07/19 03:30)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 38,
+    "fields": {
+        "action_time": "2026-08-02T04:56:59.450Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "1",
+        "object_repr": "[款式底價] 手部單色 - $1000",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 39,
+    "fields": {
+        "action_time": "2026-08-02T04:57:20.522Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "2",
+        "object_repr": "[款式底價] 足部單色 - $1000",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 40,
+    "fields": {
+        "action_time": "2026-08-02T05:05:53.484Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "1",
+        "object_repr": "[款式底價] 手部單色 - $1000.00",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 41,
+    "fields": {
+        "action_time": "2026-08-02T05:05:53.487Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "2",
+        "object_repr": "[款式底價] 足部單色 - $1000.00",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 42,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.677Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "3",
+        "object_repr": "[款式底價] 手部單色 - $1000",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 43,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.678Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "4",
+        "object_repr": "[款式底價] 足部單色 - $1100",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 44,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.678Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "5",
+        "object_repr": "[加價項目] 貓眼 - $10",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 45,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.679Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "6",
+        "object_repr": "[加價項目] 鏡面 - $20",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 46,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.680Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "7",
+        "object_repr": "[加價項目] 貓眼蹭粉 - $30",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 47,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.680Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "8",
+        "object_repr": "[加價項目] 純色漸層/鏡面漸層 - $30",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 48,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.681Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "9",
+        "object_repr": "[加價項目] 純色法式 - $50",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 49,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.681Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "10",
+        "object_repr": "[加價項目] 貓眼法式 - $60",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 50,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.681Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "11",
+        "object_repr": "[加價項目] 鏡面法式 - $70",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 51,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.682Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "12",
+        "object_repr": "[進階造型] 珍珠/鋼珠/水鑽 - $10",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 52,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.682Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "13",
+        "object_repr": "[進階造型] 亮片 - $10",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 53,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.683Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "14",
+        "object_repr": "[進階造型] 貼紙 - $20",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 54,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.683Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "15",
+        "object_repr": "[進階造型] 波點 - $30",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 55,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.684Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "16",
+        "object_repr": "[進階造型] 立體鏡面(線條造型) - $30",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 56,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.684Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "17",
+        "object_repr": "[進階造型] 立體鏡面(整面造型) - $40",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 57,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.685Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "18",
+        "object_repr": "[進階造型] 邊鑽/1~3顆小鑽 - $50",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 58,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.685Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "19",
+        "object_repr": "[進階造型] 豹紋/豹紋法式 - $50",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 59,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.685Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "20",
+        "object_repr": "[進階造型] 單色格紋 - $50",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 60,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.686Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "21",
+        "object_repr": "[進階造型] 雙色暈染 - $50",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 61,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.687Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "22",
+        "object_repr": "[進階造型] 雙色針織 - $50",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 62,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.687Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "23",
+        "object_repr": "[進階造型] 雙色格紋 - $60",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 63,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.687Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "24",
+        "object_repr": "[進階造型] 三色暈染 - $60",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 64,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.688Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "25",
+        "object_repr": "[進階造型] 三色針織 - $60",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 65,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.688Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "26",
+        "object_repr": "[進階造型] 三色格紋 - $70",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 66,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.689Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "27",
+        "object_repr": "[進階造型] 棋盤格 - $70",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 67,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.689Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "28",
+        "object_repr": "[進階造型] 手繪花 - $80",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 68,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.689Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "29",
+        "object_repr": "[進階造型] 軟糖膠 - $100",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 69,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.690Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "30",
+        "object_repr": "[進階造型] 滿鑽 - $100",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 70,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.690Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "31",
+        "object_repr": "[進階造型] 鋼板轉印 - $40",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 71,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.691Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "32",
+        "object_repr": "[進階造型] 局部鏡面 - $30",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 72,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.691Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "33",
+        "object_repr": "[進階造型] 亮粉漸層 - $20",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 73,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.691Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "34",
+        "object_repr": "[進階造型] $30飾品 - $30",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 74,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.692Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "35",
+        "object_repr": "[進階造型] $50飾品 - $30",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 75,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.692Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "36",
+        "object_repr": "[進階造型] 色鉛筆繪畫 - $40",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 76,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.692Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "37",
+        "object_repr": "[進階造型] 簡單手繪(愛心/星星/線條...) - $50",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 77,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.693Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "38",
+        "object_repr": "[進階造型] 中等手繪(寫字/動物...) - $100",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 78,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.693Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "39",
+        "object_repr": "[進階造型] 複雜手繪(卡通人物...) - $150",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 79,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.694Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "40",
+        "object_repr": "[進階造型] 上層立體造型 - $30",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 80,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.694Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "41",
+        "object_repr": "[進階造型] 造型膠立體造型 - $50",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 81,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.694Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "42",
+        "object_repr": "[卸甲服務] 本店卸甲續作(30天內免費) - $100",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 82,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.695Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "43",
+        "object_repr": "[卸甲服務] 他店卸甲續作 - $200",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 83,
+    "fields": {
+        "action_time": "2026-08-02T05:06:12.695Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "designpriceitem"
+        ],
+        "object_id": "44",
+        "object_repr": "[卸甲服務] 本/他店純卸甲(含保養) - $500",
+        "action_flag": 1,
+        "change_message": "new through import_export"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 84,
+    "fields": {
+        "action_time": "2026-08-02T08:07:26.706Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "14",
+        "object_repr": "WANG YU CHIEH - 設計款(需報價) (08/02 02:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 85,
+    "fields": {
+        "action_time": "2026-08-02T08:07:26.708Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "13",
+        "object_repr": "WANG YU CHIEH - 鏡面 + 單色 (07/23 02:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 86,
+    "fields": {
+        "action_time": "2026-08-02T08:07:26.710Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "12",
+        "object_repr": "WANG YU CHIEH - 漸層 + 單色 (07/30 02:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 87,
+    "fields": {
+        "action_time": "2026-08-02T09:37:22.891Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "16",
+        "object_repr": "WANG YU CHIEH - 漸層 + 單色 (08/02 07:30)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 88,
+    "fields": {
+        "action_time": "2026-08-02T09:37:22.894Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "appointment"
+        ],
+        "object_id": "15",
+        "object_repr": "WANG YU CHIEH - 漸層 + 單色 (08/02 10:00)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 89,
+    "fields": {
+        "action_time": "2026-08-02T09:37:29.936Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "customer"
+        ],
+        "object_id": "1",
+        "object_repr": "WANG YU CHIEH (0976725323)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 90,
+    "fields": {
+        "action_time": "2026-08-02T09:44:40.865Z",
+        "user": [
+            "barney"
+        ],
+        "content_type": [
+            "booking",
+            "customer"
+        ],
+        "object_id": "2",
+        "object_repr": "WANG YU CHIEH (0976725323)",
+        "action_flag": 3,
+        "change_message": ""
+    }
+}
+]

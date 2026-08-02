@@ -36,12 +36,16 @@ class ProviderSerializer(serializers.ModelSerializer):
 
 class AppointmentCreateSerializer(serializers.ModelSerializer):
     """
-    前端建立預約專用（完全體：支援多選主服務 ＋ 工時自動加總 ＋ 金額自動預算）
+    前端建立預約專用（支援 LINE UID 自動建檔與多選服務）
     """
     provider_id = serializers.IntegerField(write_only=True)
-    customer_id = serializers.IntegerField(write_only=True) 
     
-    # 💡 1. 將單選 service_id 改為多選 service_ids 列表
+    # 💡 1. 配合你的 Model，改收 line_uid
+    line_uid = serializers.CharField(write_only=True)
+    customer_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    customer_phone = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    customer_email = serializers.EmailField(write_only=True, required=False, allow_blank=True)
+    
     service_ids = serializers.ListField(
         child=serializers.IntegerField(),
         write_only=True
@@ -56,47 +60,77 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Appointment
-        # 💡 將 service_id 替換為 service_ids
         fields = [
-            'id', 'provider_id', 'service_ids', 'addon_ids', 'customer_id', 
+            'id', 'provider_id', 'service_ids', 'addon_ids', 
+            'line_uid', 'customer_name', 'customer_phone', 'customer_email',
             'start_time', 'memo', 'status', 'final_price'
         ]
-        read_only_fields = ['id', 'status', 'final_price'] # 🔒 安全鎖定
+        read_only_fields = ['id', 'status', 'final_price']
 
     def validate(self, data):
-        """
-        Serializer 的靈魂：防呆、時間防撞，與「多服務工時/金額自動預算」邏輯
-        """
-        # 1. 驗證服務項目不能為空
+        # 1. 驗證美甲師是否存在，並順便抓出所屬的 shop
+        try:
+            provider = Provider.objects.get(id=data['provider_id'])
+        except Provider.DoesNotExist:
+            raise serializers.ValidationError({"provider_id": "傳入的美甲師 ID 不存在。"})
+
+        shop = provider.shop
+        data['shop'] = shop
+
+        # 2. 取得 LINE UID 並處理會員自動建檔 (Upsert 邏輯)
+        line_uid = data.get('line_uid')
+        name = data.get('customer_name', 'LINE 貴賓')
+        phone = data.get('customer_phone', None)
+        email = data.get('customer_email', None)
+
+        if not line_uid:
+            raise serializers.ValidationError({"line_uid": "缺少 LINE UID 識別碼。"})
+
+        customer = Customer.objects.filter(shop=shop, line_uid=line_uid).first()
+
+        if customer:
+            # 如果找得到，直接更新她的資料
+            customer.name = name if name else customer.name
+            customer.phone = phone if phone else customer.phone
+            customer.email = email if email else customer.email
+            customer.save()
+        else:
+            # 如果找不到該 line_uid，才檢查有沒有人佔用了這個 phone
+            if phone and Customer.objects.filter(shop=shop, phone=phone).exists():
+                # 如果電話被別人佔用了，你可以選擇噴出精準的錯誤提示
+                raise serializers.ValidationError({"customer_phone": "此手機號碼已經被其他會員綁定！"})
+            
+            # 否則安全建立新會員
+            customer = Customer.objects.create(
+                shop=shop,
+                line_uid=line_uid,
+                name=name if name else 'LINE 貴賓',
+                phone=phone,
+                email=email
+            )
+        
+        data['customer'] = customer
+
+        # 3. 驗證主服務項目
         service_ids = data.get('service_ids', [])
         if not service_ids:
             raise serializers.ValidationError({"service_ids": "請至少選擇一項主服務項目。"})
 
-        try:
-            provider = Provider.objects.get(id=data['provider_id'])
-            customer = Customer.objects.get(id=data['customer_id'])
-        except (Provider.DoesNotExist, Customer.DoesNotExist):
-            raise serializers.ValidationError("傳入的 ID 不存在 (人員或會員)")
-
-        # 撈出並驗證多選主服務項目
         services = list(ServiceItem.objects.filter(id__in=service_ids, is_addon=False))
         if len(services) != len(service_ids):
             raise serializers.ValidationError({"service_ids": "部分主服務項目不存在或為加購品項。"})
 
-        data['shop'] = provider.shop
-
-        # 撈出並驗證加購項
+        # 4. 驗證加購項目
         addon_ids = data.get('addon_ids', [])
         addon_items = list(ServiceItem.objects.filter(id__in=addon_ids, is_addon=True))
         if len(addon_items) != len(addon_ids):
             raise serializers.ValidationError({"addon_ids": "部分加購項目不存在或非合法加購品項。"})
 
-        # 2. 自動推導多項主服務 ＋ 所有加購項的實質總工時
+        # 5. 總工時計算與防超賣碰撞檢查
         total_duration_minutes = sum(s.duration_minutes for s in services) + sum(addon.duration_minutes for addon in addon_items)
         start_time = data['start_time']
         end_time = start_time + datetime.timedelta(minutes=total_duration_minutes)
 
-        # 3. 終極防超賣檢查 (以總工時計算出來的 end_time 進行碰撞檢查)
         overlapping = Appointment.objects.filter(
             provider=provider,
             start_time__lt=end_time,
@@ -107,27 +141,25 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
         if overlapping:
             raise serializers.ValidationError({"start_time": "手腳太慢啦！這個時段剛剛被其他人預約了。"})
 
-        # 4. 自動預算本次實收金額 (final_price)
-        # 🎯 只要選擇的主服務中有任何一項屬於設計款/現場報價 ('QUOTE')，即保持 None/Null
+        # 6. 金額預算
         has_quote_service = any(getattr(s, 'price_type', None) == 'QUOTE' for s in services)
-
         if has_quote_service:
             data['final_price'] = None
         else:
-            # 🎯 否則自動將「所有主服務金額 ＋ 所有加購金額」加總作為預設金額
-            total_price = sum(s.price for s in services) + sum(addon.price for addon in addon_items)
-            data['final_price'] = total_price
+            data['final_price'] = sum(s.price for s in services) + sum(addon.price for addon in addon_items)
 
-        # 5. 封裝數據下放給 create()
+        # 7. 清理暫存欄位並賦予關聯
         data['end_time'] = end_time
         data['provider'] = provider
-        data['customer'] = customer
         data['services_to_save'] = services
         data['addons_to_save'] = addon_items 
 
         data.pop('provider_id')
         data.pop('service_ids')
-        data.pop('customer_id')
+        data.pop('line_uid', None)
+        data.pop('customer_name', None)
+        data.pop('customer_phone', None)
+        data.pop('customer_email', None)
         data.pop('addon_ids', None)
 
         return data
@@ -136,10 +168,8 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
         services = validated_data.pop('services_to_save', [])
         addon_items = validated_data.pop('addons_to_save', [])
         
-        # 建立預約單主體
         appointment = Appointment.objects.create(**validated_data)
         
-        # 💡 設定多對多關聯：主服務與加購項
         if services:
             appointment.services.set(services)
         if addon_items:
