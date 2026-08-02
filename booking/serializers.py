@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils import timezone
 import datetime
-from .models import Shop, Customer, Provider, ServiceItem, Appointment, ServiceRecord, DesignPriceItem, AppointmentDesignQuote, AppointmentDesignItem
+from .models import Shop, Customer, Provider, ProviderShift, ServiceItem, Appointment, ServiceRecord, DesignPriceItem, AppointmentDesignQuote, AppointmentDesignItem
 
 # ==========================================
 # GET 專用：讀取嵌套 (Read Nested)
@@ -391,3 +391,41 @@ class AppointmentDesignQuoteSerializer(serializers.ModelSerializer):
             AppointmentDesignItem.objects.create(quote=quote, **item_data)
             
         return quote
+
+class ProviderShiftSerializer(serializers.ModelSerializer):
+    """
+    美甲師班表序列化器（包含支援當日自訂休息時段 break_times）
+    """
+    class Meta:
+        model = ProviderShift
+        fields = ['id', 'provider', 'date', 'start_time', 'end_time', 'is_off', 'break_times']
+        read_only_fields = ['id']
+
+    def validate(self, data):
+        """
+        防呆驗證：
+        1. 如果不是公休，上班時間必須早於下班時間。
+        2. 檢查 break_times 格式是否合法。
+        """
+        is_off = data.get('is_off', False)
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        break_times = data.get('break_times', [])
+
+        if not is_off:
+            if not start_time or not end_time:
+                raise serializers.ValidationError("上班日必須填寫完整的上班與下班時間。")
+            if start_time >= end_time:
+                raise serializers.ValidationError("上班時間必須早於下班時間。")
+            
+            # 💡 驗證自訂休息時段格式
+            if isinstance(break_times, list):
+                for b in break_times:
+                    b_start = b.get('start')
+                    b_end = b.get('end')
+                    if b_start and b_end and b_start >= b_end:
+                        raise serializers.ValidationError("休息時段的開始時間必須早於結束時間。")
+            else:
+                raise serializers.ValidationError("break_times 必須為陣列格式。")
+        
+        return data

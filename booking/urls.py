@@ -1,12 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProviderViewSet, AppointmentViewSet, MerchantAdminViewSet, AdminServiceItemViewSet, AdminAppointmentRecordViewSet, DesignPriceItemViewSet, AppointmentDesignQuoteViewSet
+from .views import ProviderViewSet, ProviderShiftViewSet, AppointmentViewSet, MerchantAdminViewSet, AdminServiceItemViewSet, AdminAppointmentRecordViewSet, DesignPriceItemViewSet, AppointmentDesignQuoteViewSet
 
 # 建立路由器
 router = DefaultRouter()
 
 # 註冊我們的 ViewSet
 router.register(r'providers', ProviderViewSet, basename='provider')
+router.register(r'admin/shifts', ProviderShiftViewSet, basename='provider-shift')
 router.register(r'appointments', AppointmentViewSet, basename='appointment')
 router.register(r'admin/appointments-records', AdminAppointmentRecordViewSet, basename='admin-appointments-records')
 router.register(r'admin', MerchantAdminViewSet, basename='merchant-admin')
