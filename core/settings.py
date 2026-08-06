@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'booking',
+    'accounts',
     'import_export',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -134,7 +136,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
-    'COERCE_DECIMAL_TO_STRING': False, 
+    'COERCE_DECIMAL_TO_STRING': False,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),      # Access Token 有效期設為 1 天
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Refresh Token 有效期設為 7 天
+    'ROTATE_REFRESH_TOKENS': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
