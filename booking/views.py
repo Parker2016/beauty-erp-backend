@@ -26,6 +26,13 @@ class ProviderViewSet(viewsets.ModelViewSet): # 💡 1. 核心修正：改為 Mo
     queryset = Provider.objects.all().order_by('id')
     serializer_class = ProviderSerializer
 
+    def get_queryset(self):
+        """
+        💡 核心修正：依照前端帶入的 shop_id 進行多租戶網域隔離（預設 1）
+        """
+        shop_id = self.request.query_params.get('shop_id', 1)
+        return Provider.objects.filter(shop_id=shop_id).order_by('id')
+    
     def perform_create(self, serializer):
         # 💡 2. 核心修正：新增人員時，自動幫忙綁定預設店鋪 (shop_id=1)
         shop_id = self.request.data.get('shop_id', 1)
@@ -252,6 +259,11 @@ class AdminAppointmentRecordViewSet(viewsets.ModelViewSet):
             .prefetch_related('services', 'addons', 'record')\
             .order_by('-id')
 
+    def perform_create(self, serializer):
+        # 💡 新增預約單時，從 request 取得 shop_id（預設 1）並綁定
+        shop_id = self.request.data.get('shop_id', 1)
+        serializer.save(shop_id=shop_id)
+
 class DesignPriceItemViewSet(viewsets.ModelViewSet):
     """
     美甲店設計款菜單維護 API
@@ -366,7 +378,7 @@ class AppointmentDesignQuoteViewSet(viewsets.ViewSet):
             )
 
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(shop=appointment.shop)
             return Response(serializer.data, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -346,6 +346,7 @@ class AdminAppointmentWithRecordSerializer(serializers.ModelSerializer):
             ServiceRecord.objects.update_or_create(
                 appointment=instance,
                 defaults={
+                    'shop': instance.shop,
                     'materials_note': materials_note,
                     'image_url': image_url
                 }
@@ -413,8 +414,11 @@ class AppointmentDesignQuoteSerializer(serializers.ModelSerializer):
         # 從 context 取得綁定的預約單 (View 裡面會傳入)
         appointment = self.context['appointment']
         
-        # 建立主表
-        quote = AppointmentDesignQuote.objects.create(appointment=appointment, **validated_data)
+        quote = AppointmentDesignQuote.objects.create(
+            appointment=appointment, 
+            shop=appointment.shop,
+            **validated_data
+        )
         
         # 建立明細
         for item_data in items_data:
