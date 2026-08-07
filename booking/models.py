@@ -159,9 +159,10 @@ class ServiceItem(models.Model):
     price_type = models.CharField(max_length=10, choices=PRICE_TYPE_CHOICES, default='FIXED')
     
     CATEGORY_CHOICES = [
-        ('HAND', '手部服務'),
-        ('FOOT', '足部服務'),
-        ('PURE_REMOVAL', '純卸甲'),
+        ('HAND', '手部美甲'),
+        ('FOOT', '足部美甲'),
+        ('PURE_REMOVAL', '純保養/純卸甲'),
+        ('EAR', '采耳'),
         ('ADDON', '加購項目'),
     ]
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='HAND')
