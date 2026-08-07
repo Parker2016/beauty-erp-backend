@@ -282,7 +282,7 @@ class DesignPriceItemViewSet(viewsets.ModelViewSet):
         serializer.save(shop_id=shop_id)
 
     # =========================================================================
-    # 💡 新增：對應前端 batchUpdateDesignPrices 的批次處理端點
+    # 💡 最佳化：對應前端 batchUpdateDesignPrices 的極速批次處理端點
     # 對應路由: POST /api/admin/design-prices/batch/
     # =========================================================================
     @action(detail=False, methods=['post'], url_path='batch')
@@ -296,42 +296,67 @@ class DesignPriceItemViewSet(viewsets.ModelViewSet):
 
         try:
             with transaction.atomic():
-                # 1. 批次刪除
+                # -------------------------------------------------------------
+                # 1. 批次刪除 (僅 1 次 SQL)
+                # -------------------------------------------------------------
                 if deleted_ids:
                     DesignPriceItem.objects.filter(shop=shop, id__in=deleted_ids).delete()
 
-                # 2. 批次新增與更新
-                for item in items_data:
-                    item_id = item.get('id')
+                # 分離「要更新」與「要新增」的資料
+                update_items_data = [i for i in items_data if i.get('id')]
+                create_items_data = [i for i in items_data if not i.get('id')]
+
+                # -------------------------------------------------------------
+                # 2. 批次更新 (僅 1 次 SELECT + 1 次 bulk_update SQL)
+                # -------------------------------------------------------------
+                if update_items_data:
+                    update_ids = [i['id'] for i in update_items_data]
+                    # 💡 in_bulk 一口氣撈出所有要修改的紀錄 (字典格式: {id: obj})
+                    existing_map = DesignPriceItem.objects.filter(shop=shop, id__in=update_ids).in_bulk()
                     
-                    if item_id:
-                        # 更新已存在項目
-                        try:
-                            db_item = DesignPriceItem.objects.get(shop=shop, id=item_id)
+                    to_update_objs = []
+                    for item in update_items_data:
+                        db_item = existing_map.get(item['id'])
+                        if db_item:
+                            # 只在記憶體中修改屬性，絕對不呼叫 db_item.save()！
                             db_item.category = item.get('category', db_item.category)
                             db_item.name = item.get('name', db_item.name)
                             db_item.price = item.get('price', db_item.price)
                             db_item.sort_order = item.get('sort_order', db_item.sort_order)
                             db_item.is_active = item.get('is_active', db_item.is_active)
-                            db_item.save()
-                        except DesignPriceItem.DoesNotExist:
-                            continue 
-                    else:
-                        # 新增項目
-                        if item.get('name') and item.get('category'):
-                            DesignPriceItem.objects.create(
-                                shop=shop,
-                                category=item.get('category'),
-                                name=item.get('name'),
-                                price=item.get('price', 0),
-                                sort_order=item.get('sort_order', 1),
-                                is_active=item.get('is_active', True)
-                            )
+                            to_update_objs.append(db_item)
+
+                    if to_update_objs:
+                        # 💡 批次寫入資料庫
+                        DesignPriceItem.objects.bulk_update(
+                            to_update_objs,
+                            fields=['category', 'name', 'price', 'sort_order', 'is_active']
+                        )
+
+                # -------------------------------------------------------------
+                # 3. 批次新增 (僅 1 次 bulk_create SQL)
+                # -------------------------------------------------------------
+                if create_items_data:
+                    to_create_objs = [
+                        DesignPriceItem(
+                            shop=shop,
+                            category=item.get('category'),
+                            name=item.get('name'),
+                            price=item.get('price', 0),
+                            sort_order=item.get('sort_order', 1),
+                            is_active=item.get('is_active', True)
+                        )
+                        for item in create_items_data
+                        if item.get('name') and item.get('category')
+                    ]
+                    if to_create_objs:
+                        # 💡 批次寫入資料庫
+                        DesignPriceItem.objects.bulk_create(to_create_objs)
 
             return Response({'message': '批次更新成功'}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            return Response({'error': '批次更新失敗，請檢查資料格式'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': f'批次更新失敗: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class AppointmentDesignQuoteViewSet(viewsets.ViewSet):
