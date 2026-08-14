@@ -1,5 +1,6 @@
 # booking/views.py
 import datetime
+import logging
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -16,7 +17,9 @@ from .serializers import (
     ServiceItemSerializer,
     DesignPriceItemSerializer, AppointmentDesignQuoteSerializer
 )
+from notifications.services.line_service import notify_new_appointment_to_group
 
+logger = logging.getLogger(__name__)
 
 class ProviderViewSet(viewsets.ModelViewSet): # 💡 1. 核心修正：改為 ModelViewSet 才能接收 POST/PATCH/DELETE
     """
@@ -219,7 +222,16 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         if self.action in ['create', 'update', 'partial_update']:
             return AppointmentCreateSerializer
         return AppointmentCreateSerializer 
+    def perform_create(self, serializer):
+        # 1. 先將預約資料寫入資料庫並取得 Appointment 物件
+        appointment = serializer.save()
 
+        # 2. 觸發 LINE 工作群組通知 (加入 try-except 保護)
+        try:
+            send_line_booking_notification(appointment)
+        except Exception as e:
+            # 即使 LINE 推播失敗，僅記錄 Log，不影響顧客預約成功回傳
+            print(f'發送 LINE 預約通知失敗 (預約 ID: {appointment.id}): {str(e)}')
 
 class MerchantAdminViewSet(viewsets.ViewSet):
     """
