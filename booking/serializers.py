@@ -68,48 +68,59 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'status', 'final_price']
 
     def validate(self, data):
-        # 1. 驗證美甲師是否存在，並順便抓出所屬的 shop
+        # 1. 驗證美甲師是否存在
         try:
-            provider = Provider.objects.get(id=data['provider_id'])
+            provider = Provider.objects.get(id=data["provider_id"])
         except Provider.DoesNotExist:
-            raise serializers.ValidationError({"provider_id": "傳入的美甲師 ID 不存在。"})
+            raise serializers.ValidationError(
+                {"provider_id": "傳入的美甲師 ID 不存在。"}
+            )
 
         shop = provider.shop
-        data['shop'] = shop
+        data["shop"] = shop
 
-        # 2. 取得 LINE UID 並處理會員自動建檔 (Upsert 邏輯)
-        line_uid = data.get('line_uid')
-        name = data.get('customer_name', 'LINE 貴賓')
-        phone = data.get('customer_phone', None)
-        email = data.get('customer_email', None)
+        # 2. 💡 升級版會員自動識別與智慧綁定邏輯 (Upsert)
+        line_uid = data.get("line_uid")
+        name = data.get("customer_name", "").strip() or "LINE 貴賓"
+        phone = data.get("customer_phone", "").strip() or None
+        email = data.get("customer_email", "").strip() or None
 
         if not line_uid:
-            raise serializers.ValidationError({"line_uid": "缺少 LINE UID 識別碼。"})
+            raise serializers.ValidationError(
+                {"line_uid": "缺少 LINE UID 識別碼。"}
+            )
 
-        customer = Customer.objects.filter(shop=shop, line_uid=line_uid).first()
+        # 優先由 LINE UID 尋找
+        customer = Customer.objects.filter(
+            shop=shop, line_uid=line_uid
+        ).first()
+
+        # 如果此 LINE UID 沒來過，但手機號碼已存在 (例如舊客初次使用線上預約，或換 LINE)
+        if not customer and phone:
+            customer = Customer.objects.filter(shop=shop, phone=phone).first()
+            if customer:
+                # 自動更新/綁定新的 LINE UID
+                customer.line_uid = line_uid
 
         if customer:
-            # 如果找得到，直接更新她的資料
-            customer.name = name if name else customer.name
-            customer.phone = phone if phone else customer.phone
-            customer.email = email if email else customer.email
+            # 找到會員，更新為本次填寫的最新資料（包含更正名字、電話、信箱）
+            customer.name = name
+            if phone:
+                customer.phone = phone
+            if email:
+                customer.email = email
             customer.save()
         else:
-            # 如果找不到該 line_uid，才檢查有沒有人佔用了這個 phone
-            if phone and Customer.objects.filter(shop=shop, phone=phone).exists():
-                # 如果電話被別人佔用了，你可以選擇噴出精準的錯誤提示
-                raise serializers.ValidationError({"customer_phone": "此手機號碼已經被其他會員綁定！"})
-            
-            # 否則安全建立新會員
+            # 完全新客，建立新會員建檔
             customer = Customer.objects.create(
                 shop=shop,
                 line_uid=line_uid,
-                name=name if name else 'LINE 貴賓',
+                name=name,
                 phone=phone,
-                email=email
+                email=email,
             )
-        
-        data['customer'] = customer
+
+        data["customer"] = customer
 
         # 3. 驗證主服務項目
         service_ids = data.get('service_ids', [])
