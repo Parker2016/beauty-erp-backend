@@ -211,27 +211,39 @@ class ProviderShiftViewSet(viewsets.ModelViewSet):
             )
         
 class AppointmentViewSet(viewsets.ModelViewSet):
-    """
-    預約訂單視圖 (大堂經理)
+    """預約訂單視圖 (大堂經理)
+
     負責接收前端的預約請求。
     """
+
     queryset = Appointment.objects.all()
-    permission_classes = [permissions.AllowAny] 
+    permission_classes = [permissions.AllowAny]
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
             return AppointmentCreateSerializer
-        return AppointmentCreateSerializer 
+        return AppointmentCreateSerializer
+
     def perform_create(self, serializer):
-        # 1. 先將預約資料寫入資料庫並取得 Appointment 物件
+        # 1. 寫入資料庫並取得 appointment 實例
         appointment = serializer.save()
 
-        # 2. 觸發 LINE 工作群組通知 (加入 try-except 保護)
+        # 2. 呼叫服務推播 Flex 卡片至 LINE 工作群組
         try:
-            send_line_booking_notification(appointment)
+            success = notify_new_appointment_to_group(appointment)
+            if success:
+                logger.info(
+                    f'✅ 預約單 #{appointment.id} 成功發送 LINE 群組推播'
+                )
+            else:
+                logger.warning(
+                    f'⚠️ 預約單 #{appointment.id} 發送 LINE 群組推播失敗（請確認 Log）'
+                )
         except Exception as e:
-            # 即使 LINE 推播失敗，僅記錄 Log，不影響顧客預約成功回傳
-            print(f'發送 LINE 預約通知失敗 (預約 ID: {appointment.id}): {str(e)}')
+            # 保護機制：推播即便爆掉也不中斷顧客預約成功流程
+            logger.error(
+                f'❌ LINE 群組通知執行異常 (預約單 #{appointment.id}): {str(e)}'
+            )
 
 class MerchantAdminViewSet(viewsets.ViewSet):
     """
