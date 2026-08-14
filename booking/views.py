@@ -130,47 +130,82 @@ class ProviderShiftViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], url_path='batch')
     def batch_save(self, request):
         """
-        整月批次排班 / 單日調整端點（支援 break_times 休息時段）
+        整月批次排班 / 多日批次排班端點（支援 bulk 高效能寫入）
         """
         data = request.data
         provider_id = data.get('provider_id')
         shifts_data = data.get('shifts', [])
 
         if not provider_id or not shifts_data:
-            return Response({"error": "請提供 provider_id 與 shifts 資料陣列"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "請提供 provider_id 與 shifts 資料陣列"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         provider = get_object_or_404(Provider, id=provider_id)
 
         try:
             with transaction.atomic():
-                for shift_item in shifts_data:
-                    date_str = shift_item.get('date')
-                    if not date_str:
-                        continue
+                # 1. 整理前端傳入的所有有效日期
+                valid_shifts = [s for s in shifts_data if s.get('date')]
+                incoming_dates = [s['date'] for s in valid_shifts]
 
+                # 2. 💡 一次性查詢已存在的班表（以 date 為 key 的 dictionary）
+                existing_shifts = ProviderShift.objects.filter(
+                    provider=provider, 
+                    date__in=incoming_dates
+                )
+                existing_map = {str(s.date): s for s in existing_shifts}
+
+                to_update_objs = []
+                to_create_objs = []
+
+                # 3. 記憶體中分流：要更新 vs 要新增
+                for shift_item in valid_shifts:
+                    date_str = str(shift_item.get('date'))
                     is_off = shift_item.get('is_off', False)
                     start_time = shift_item.get('start_time') if not is_off else None
                     end_time = shift_item.get('end_time') if not is_off else None
-                    
-                    # 💡 抓取前端傳來的休息時段清單（如果是公休則清空）
                     break_times = shift_item.get('break_times', []) if not is_off else []
 
-                    # 有則更新 (Update)，無則新增 (Create)
-                    ProviderShift.objects.update_or_create(
-                        provider=provider,
-                        date=date_str,
-                        defaults={
-                            'start_time': start_time,
-                            'end_time': end_time,
-                            'is_off': is_off,
-                            'break_times': break_times  # 💡 寫入 JSON 欄位
-                        }
+                    if date_str in existing_map:
+                        # 更新既有班表物件屬性
+                        db_shift = existing_map[date_str]
+                        db_shift.start_time = start_time
+                        db_shift.end_time = end_time
+                        db_shift.is_off = is_off
+                        db_shift.break_times = break_times
+                        to_update_objs.append(db_shift)
+                    else:
+                        # 準備新增的班表物件
+                        to_create_objs.append(
+                            ProviderShift(
+                                provider=provider,
+                                date=date_str,
+                                start_time=start_time,
+                                end_time=end_time,
+                                is_off=is_off,
+                                break_times=break_times
+                            )
+                        )
+
+                # 4. 💡 執行批次寫入（各 1 次 SQL）
+                if to_update_objs:
+                    ProviderShift.objects.bulk_update(
+                        to_update_objs,
+                        fields=['start_time', 'end_time', 'is_off', 'break_times']
                     )
 
-            return Response({"message": "排班資料儲存成功"}, status=status.HTTP_200_OK)
+                if to_create_objs:
+                    ProviderShift.objects.bulk_create(to_create_objs)
+
+            return Response({"message": "排班資料批次儲存成功"}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            return Response({"error": f"排班儲存失敗: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": f"排班儲存失敗: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         
 class AppointmentViewSet(viewsets.ModelViewSet):
     """
