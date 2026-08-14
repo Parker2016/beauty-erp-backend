@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import dj_database_url
 import os
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,6 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-!thfh3ca3c0^3+ta3gy7bxn!zul@!m*nxu4i%^*s#5i%-r-^+5'
+
+load_dotenv(BASE_DIR / '.env')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
@@ -42,6 +46,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'booking',
     'accounts',
+    'notifications',
     'import_export',
     'rest_framework_simplejwt',
 ]
@@ -152,3 +157,9 @@ SIMPLE_JWT = {
 }
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# LINE Messaging API 配置 (建議由 .env 讀取)
+LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', '')
+LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET', '')
+LINE_WORK_GROUP_ID = os.getenv('LINE_WORK_GROUP_ID', '')  # 抓到 Group ID 後填入 .env
+ADMIN_FRONTEND_URL = os.getenv('ADMIN_FRONTEND_URL', 'https://your-admin-url.com')
